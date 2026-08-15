@@ -8,6 +8,7 @@ class ExpenseTransaction {
   final TransactionType type;
   final String category;
   final String? account;
+  final String? note;
 
   const ExpenseTransaction({
     required this.id,
@@ -17,5 +18,6 @@ class ExpenseTransaction {
     required this.type,
     required this.category,
     this.account,
+    this.note,
   });
 }

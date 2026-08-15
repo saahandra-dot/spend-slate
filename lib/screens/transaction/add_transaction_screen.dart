@@ -1,15 +1,21 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:expense_tracker/models/transaction.dart';
-import 'package:flutter/material.dart';
+import 'package:expense_tracker/providers/transaction_provider.dart';
 
-class AddTransactionScreen extends StatefulWidget {
-  const AddTransactionScreen({super.key});
+class AddTransactionScreen extends ConsumerStatefulWidget {
+  final ExpenseTransaction? transaction;
+
+  const AddTransactionScreen({super.key, this.transaction});
 
   @override
-  State<AddTransactionScreen> createState() => _AddTransactionScreenState();
+  ConsumerState<AddTransactionScreen> createState() =>
+      _AddTransactionScreenState();
 }
 
-class _AddTransactionScreenState extends State<AddTransactionScreen> {
+class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
@@ -21,7 +27,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   DateTime _selectedDate = DateTime.now();
 
-  final List<String> _expensecCategories = [
+  final List<String> _expenseCategories = [
     'Groceries',
     'Cafe',
     'Clothing',
@@ -43,13 +49,51 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     'Other Income',
   ];
 
+  List<String> get _availableCategories {
+    final List<String> categories = _selectedType == TransactionType.income
+        ? [..._incomeCategories]
+        : [..._expenseCategories];
+
+    final selectedCategory = _selectedCategory;
+
+    if (selectedCategory != null && !categories.contains(selectedCategory)) {
+      categories.add(selectedCategory);
+    }
+
+    return categories;
+  }
+
   final List<String> _accounts = ['Debit Card', 'Credit Card', 'Savings'];
 
-  List<String> get _availableCategories {
-    if (_selectedType == TransactionType.income) {
-      return _incomeCategories;
+  List<String> get _availableAccounts {
+    final List<String> accounts = [..._accounts];
+
+    final selectedAccount = _selectedAccount;
+
+    if (selectedAccount != null && !accounts.contains(selectedAccount)) {
+      accounts.add(selectedAccount);
     }
-    return _expensecCategories;
+
+    return accounts;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    final transaction = widget.transaction;
+    if (transaction == null) {
+      return;
+    }
+
+    _amountController.text = transaction.amount.toStringAsFixed(2);
+
+    _selectedType = transaction.type;
+    _selectedCategory = transaction.category;
+    _selectedAccount = transaction.account;
+    _selectedDate = transaction.date;
+
+    _noteController.text = transaction.note ?? '';
   }
 
   @override
@@ -88,30 +132,46 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
     final double amount = double.parse(_amountController.text.trim());
 
-    debugPrint('Transaction type: $_selectedType');
+    final String category = _selectedCategory!;
 
-    debugPrint('Amount: $amount');
+    final String account = _selectedAccount!;
 
-    debugPrint('Category: $_selectedCategory');
+    final String note = _noteController.text.trim();
 
-    debugPrint('Date: $_selectedDate');
+    final ExpenseTransaction? existingTransaction = widget.transaction;
 
-    debugPrint('Account: $_selectedAccount');
+    final ExpenseTransaction transaction = ExpenseTransaction(
+      id:
+          existingTransaction?.id ??
+          DateTime.now().microsecondsSinceEpoch.toString(),
+      title: category,
+      amount: amount,
+      date: _selectedDate,
+      type: _selectedType,
+      category: category,
+      account: account,
+      note: note.isEmpty ? null : note,
+    );
 
-    debugPrint('Note: ${_noteController.text.trim()}');
+    final controller = ref.read(transactionsProvider.notifier);
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Transaction is valid.')));
+    if (existingTransaction == null) {
+      controller.addTransaction(transaction);
+    } else {
+      controller.updateTransaction(transaction);
+    }
+
+    Navigator.of(context).pop(true);
   }
 
   @override
   Widget build(BuildContext context) {
+    final bool isEditing = widget.transaction != null;
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
-          'Add Transaction',
+        title: Text(
+          isEditing ? 'Edit Transaction' : 'Add Transaction',
           style: TextStyle(fontWeight: FontWeight.w700),
         ),
       ),
@@ -227,7 +287,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     prefixIcon: Icon(Icons.account_balance_wallet_rounded),
                   ),
                   autovalidateMode: AutovalidateMode.onUserInteraction,
-                  items: _accounts.map((account) {
+                  items: _availableAccounts.map((account) {
                     return DropdownMenuItem<String>(
                       value: account,
                       child: Text(account),
@@ -267,8 +327,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
                 ElevatedButton(
                   onPressed: _submitTransaction,
-                  child: const Text(
-                    'Add Transaction',
+                  child: Text(
+                    isEditing ? 'Save Changes' : 'Add Transaction',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                   ),
                 ),

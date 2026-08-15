@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 
 class TransactionTile extends StatelessWidget {
   final ExpenseTransaction transaction;
+  final VoidCallback? onTap;
 
-  const TransactionTile({super.key, required this.transaction});
+  const TransactionTile({super.key, required this.transaction, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -13,72 +14,76 @@ class TransactionTile extends StatelessWidget {
     final Color categoryColor = _getCategoryColor(transaction.category);
     final IconData categoryIcon = _getCategoryIcon(transaction.category);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 14),
-      child: Row(
-        children: [
-          Container(
-            width: 46,
-            height: 46,
-            decoration: BoxDecoration(
-              color: categoryColor.withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(14),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        child: Row(
+          children: [
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                color: categoryColor.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(categoryIcon, color: categoryColor, size: 22),
             ),
-            child: Icon(categoryIcon, color: categoryColor, size: 22),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  transaction.title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    transaction.title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
-                ),
 
-                if (transaction.account != null) ...[
-                  const SizedBox(height: 5),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.credit_card_rounded,
-                        size: 14,
-                        color: categoryColor,
-                      ),
-                      const SizedBox(width: 5),
-                      Expanded(
-                        child: Text(
-                          transaction.account!,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textSecondary,
+                  if (transaction.account != null) ...[
+                    const SizedBox(height: 5),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.credit_card_rounded,
+                          size: 14,
+                          color: categoryColor,
+                        ),
+                        const SizedBox(width: 5),
+                        Expanded(
+                          child: Text(
+                            transaction.account!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
-          const SizedBox(width: 12),
+            const SizedBox(width: 12),
 
-          Text(
-            '${isExpense ? '-' : '+'}'
-            '\$${transaction.amount.toStringAsFixed(2)}',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: isExpense ? AppColors.expense : AppColors.positive,
+            Text(
+              '${isExpense ? '-' : '+'}'
+              '\$${transaction.amount.toStringAsFixed(2)}',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: isExpense ? AppColors.expense : AppColors.positive,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

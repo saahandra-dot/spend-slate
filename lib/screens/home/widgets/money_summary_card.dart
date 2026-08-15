@@ -2,7 +2,14 @@ import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class MoneySummaryCard extends StatelessWidget {
-  const MoneySummaryCard({super.key});
+  final double income;
+  final double expenses;
+
+  const MoneySummaryCard({
+    super.key,
+    required this.income,
+    required this.expenses,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -56,12 +63,12 @@ class MoneySummaryCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 24),
-          const Row(
+          Row(
             children: [
               Expanded(
                 child: _MoneyItem(
                   title: 'Income',
-                  amount: '\$4,875.12',
+                  amount: _formatCurrency(income),
                   icon: Icons.arrow_downward_rounded,
                   color: AppColors.income,
                 ),
@@ -75,7 +82,7 @@ class MoneySummaryCard extends StatelessWidget {
               Expanded(
                 child: _MoneyItem(
                   title: 'Expense',
-                  amount: '\$88,145.78',
+                  amount: _formatCurrency(expenses),
                   icon: Icons.arrow_upward_rounded,
                   color: AppColors.expense,
                 ),
@@ -85,6 +92,10 @@ class MoneySummaryCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _formatCurrency(double amount) {
+    return '\$${amount.toStringAsFixed(2)}';
   }
 }
 

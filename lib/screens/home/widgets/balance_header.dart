@@ -1,13 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../providers/transaction_provider.dart';
 import 'money_summary_card.dart';
 
-class BalanceHeader extends StatelessWidget {
+class BalanceHeader extends ConsumerWidget {
   const BalanceHeader({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final double currentBalance = ref.watch(currentBalanceProvider);
+
+    final double totalIncome = ref.watch(totalIncomeProvider);
+
+    final double totalExpenses = ref.watch(totalExpensesProvider);
+
     return SizedBox(
       height: 455,
       child: Stack(
@@ -34,8 +42,8 @@ class BalanceHeader extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
-                      '\$87,457.85',
+                    Text(
+                      _formatCurrency(currentBalance),
                       style: TextStyle(
                         fontSize: 42,
                         height: 1.1,
@@ -59,15 +67,30 @@ class BalanceHeader extends StatelessWidget {
             ),
           ),
 
-          const Positioned(
+          Positioned(
             top: 250,
             left: 16,
             right: 16,
-            child: MoneySummaryCard(),
+            child: MoneySummaryCard(
+              income: totalIncome,
+              expenses: totalExpenses,
+            ),
           ),
         ],
       ),
     );
+  }
+
+  String _formatCurrency(double amount) {
+    final bool isNegative = amount < 0;
+
+    final String value = amount.abs().toStringAsFixed(2);
+
+    if (isNegative) {
+      return '-\$$value';
+    }
+
+    return '\$$value';
   }
 }
 

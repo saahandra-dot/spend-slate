@@ -1,46 +1,21 @@
-import 'package:expense_tracker/core/theme/app_colors.dart';
-import 'package:expense_tracker/models/transaction.dart';
-import 'package:expense_tracker/screens/home/widgets/transaction_tile.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class TransactionsSection extends StatelessWidget {
+import '../../../core/theme/app_colors.dart';
+import '../../../models/transaction.dart';
+import '../../../providers/transaction_provider.dart';
+import 'transaction_tile.dart';
+
+class TransactionsSection extends ConsumerWidget {
   const TransactionsSection({super.key});
 
-  static final List<ExpenseTransaction> _transactions = [
-    ExpenseTransaction(
-      id: '1',
-      title: 'Cash, EUR',
-      amount: 354.25,
-      date: DateTime(2026, 1, 12),
-      type: TransactionType.expense,
-      category: 'Cash',
-      account: 'Red Card',
-    ),
-    ExpenseTransaction(
-      id: '2',
-      title: 'Cafes',
-      amount: 12.49,
-      date: DateTime(2026, 1, 12),
-      type: TransactionType.expense,
-      category: 'Cafe',
-      account: 'Vacation',
-    ),
-    ExpenseTransaction(
-      id: '3',
-      title: 'Groceries',
-      amount: 86.40,
-      date: DateTime(2026, 1, 12),
-      type: TransactionType.expense,
-      category: 'Groceries',
-      account: 'Debit Card',
-    ),
-  ];
-
   @override
-  Widget build(BuildContext context) {
-    final double totalExpenses = _transactions
-        .where((transaction) => transaction.type == TransactionType.expense)
-        .fold(0, (total, transaction) => total + transaction.amount);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final List<ExpenseTransaction> transactions = ref.watch(
+      transactionsProvider,
+    );
+
+    final double totalExpenses = ref.watch(totalExpensesProvider);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
@@ -82,10 +57,10 @@ class TransactionsSection extends StatelessWidget {
 
           const SizedBox(height: 8),
 
-          for (int index = 0; index < _transactions.length; index++) ...[
-            TransactionTile(transaction: _transactions[index]),
+          for (int index = 0; index < transactions.length; index++) ...[
+            TransactionTile(transaction: transactions[index]),
 
-            if (index != _transactions.length - 1) const Divider(height: 1),
+            if (index != transactions.length - 1) const Divider(height: 1),
           ],
         ],
       ),
