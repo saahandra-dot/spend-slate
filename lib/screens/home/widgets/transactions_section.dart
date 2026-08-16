@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../transaction/transaction_details_screen.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../models/transaction.dart';
 import '../../../providers/transaction_provider.dart';
@@ -58,7 +59,18 @@ class TransactionsSection extends ConsumerWidget {
           const SizedBox(height: 8),
 
           for (int index = 0; index < transactions.length; index++) ...[
-            TransactionTile(transaction: transactions[index]),
+            TransactionTile(
+              transaction: transactions[index],
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => TransactionDetailsScreen(
+                      transaction: transactions[index],
+                    ),
+                  ),
+                );
+              },
+            ),
 
             if (index != transactions.length - 1) const Divider(height: 1),
           ],
