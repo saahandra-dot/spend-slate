@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../providers/transaction_provider.dart';
 import 'money_summary_card.dart';
+import '../../../core/utils/app_formatters.dart';
 
 class BalanceHeader extends ConsumerWidget {
   const BalanceHeader({super.key});
@@ -43,7 +44,7 @@ class BalanceHeader extends ConsumerWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      _formatCurrency(currentBalance),
+                      AppFormatters.currency(currentBalance),
                       style: TextStyle(
                         fontSize: 42,
                         height: 1.1,
@@ -54,7 +55,7 @@ class BalanceHeader extends ConsumerWidget {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      '+\$784 than last week',
+                      'Based on your recorded transactions',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
@@ -79,18 +80,6 @@ class BalanceHeader extends ConsumerWidget {
         ],
       ),
     );
-  }
-
-  String _formatCurrency(double amount) {
-    final bool isNegative = amount < 0;
-
-    final String value = amount.abs().toStringAsFixed(2);
-
-    if (isNegative) {
-      return '-\$$value';
-    }
-
-    return '\$$value';
   }
 }
 
@@ -135,7 +124,7 @@ class _MonthSelector extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          'November 2025',
+          'All Time',
           style: TextStyle(
             color: Colors.white,
             fontSize: 14,

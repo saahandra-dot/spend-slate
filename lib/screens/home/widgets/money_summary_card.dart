@@ -1,5 +1,7 @@
-import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+
+import '../../../core/utils/app_formatters.dart';
+import 'package:expense_tracker/core/theme/app_colors.dart';
 
 class MoneySummaryCard extends StatelessWidget {
   final double income;
@@ -68,7 +70,7 @@ class MoneySummaryCard extends StatelessWidget {
               Expanded(
                 child: _MoneyItem(
                   title: 'Income',
-                  amount: _formatCurrency(income),
+                  amount: AppFormatters.currency(income),
                   icon: Icons.arrow_downward_rounded,
                   color: AppColors.income,
                 ),
@@ -82,7 +84,7 @@ class MoneySummaryCard extends StatelessWidget {
               Expanded(
                 child: _MoneyItem(
                   title: 'Expense',
-                  amount: _formatCurrency(expenses),
+                  amount: AppFormatters.currency(expenses),
                   icon: Icons.arrow_upward_rounded,
                   color: AppColors.expense,
                 ),
@@ -92,10 +94,6 @@ class MoneySummaryCard extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  String _formatCurrency(double amount) {
-    return '\$${amount.toStringAsFixed(2)}';
   }
 }
 

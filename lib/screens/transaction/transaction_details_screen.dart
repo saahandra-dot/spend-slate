@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/transaction.dart';
 import '../../providers/transaction_provider.dart';
+import '../../core/utils/app_formatters.dart';
 import 'add_transaction_screen.dart';
 
 class TransactionDetailsScreen extends ConsumerWidget {
@@ -67,7 +68,7 @@ class TransactionDetailsScreen extends ConsumerWidget {
 
                   Text(
                     '${isExpense ? '-' : '+'}'
-                    '\$${transaction.amount.toStringAsFixed(2)}',
+                    '${AppFormatters.currency(transaction.amount)}',
                     style: TextStyle(
                       fontSize: 30,
                       fontWeight: FontWeight.w700,
@@ -108,7 +109,7 @@ class TransactionDetailsScreen extends ConsumerWidget {
 
                   _DetailRow(
                     label: 'Date',
-                    value: _formatDate(transaction.date),
+                    value: AppFormatters.date(transaction.date),
                   ),
 
                   if (transaction.note != null &&
@@ -211,29 +212,27 @@ class TransactionDetailsScreen extends ConsumerWidget {
       return;
     }
 
-    ref.read(transactionsProvider.notifier).removeTransaction(transaction.id);
+    try {
+      await ref
+          .read(transactionsProvider.notifier)
+          .removeTransaction(transaction.id);
 
-    Navigator.of(context).pop();
-  }
+      if (!context.mounted) {
+        return;
+      }
 
-  String _formatDate(DateTime date) {
-    const months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
+      Navigator.of(context).pop();
+    } catch (error) {
+      if (!context.mounted) {
+        return;
+      }
 
-    return '${months[date.month - 1]} '
-        '${date.day}, ${date.year}';
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not delete transaction. Please try again.'),
+        ),
+      );
+    }
   }
 }
 

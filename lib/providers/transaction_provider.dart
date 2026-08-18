@@ -1,13 +1,31 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../database/app_database.dart';
 import '../models/transaction.dart';
+import '../repositories/transaction_repository.dart';
+
+final appDatabaseProvider = Provider<AppDatabase>((ref) {
+  final database = AppDatabase.defaults();
+
+  ref.onDispose(database.close);
+
+  return database;
+});
+
+final transactionRepositoryProvider = Provider<TransactionRepository>((ref) {
+  final database = ref.watch(appDatabaseProvider);
+
+  return TransactionRepository(database);
+});
 
 final transactionsProvider =
-    NotifierProvider<TransactionController, List<ExpenseTransaction>>(
+    AsyncNotifierProvider<TransactionController, List<ExpenseTransaction>>(
       TransactionController.new,
     );
+
 final totalIncomeProvider = Provider<double>((ref) {
-  final transactions = ref.watch(transactionsProvider);
+  final transactions =
+      ref.watch(transactionsProvider).value ?? const <ExpenseTransaction>[];
 
   return transactions
       .where((transaction) => transaction.type == TransactionType.income)
@@ -15,7 +33,8 @@ final totalIncomeProvider = Provider<double>((ref) {
 });
 
 final totalExpensesProvider = Provider<double>((ref) {
-  final transactions = ref.watch(transactionsProvider);
+  final transactions =
+      ref.watch(transactionsProvider).value ?? const <ExpenseTransaction>[];
 
   return transactions
       .where((transaction) => transaction.type == TransactionType.expense)
@@ -23,62 +42,45 @@ final totalExpensesProvider = Provider<double>((ref) {
 });
 
 final currentBalanceProvider = Provider<double>((ref) {
-  final totalIncome = ref.watch(totalIncomeProvider);
+  final income = ref.watch(totalIncomeProvider);
 
-  final totalExpenses = ref.watch(totalExpensesProvider);
+  final expenses = ref.watch(totalExpensesProvider);
 
-  return totalIncome - totalExpenses;
+  return income - expenses;
 });
 
-class TransactionController extends Notifier<List<ExpenseTransaction>> {
+class TransactionController extends AsyncNotifier<List<ExpenseTransaction>> {
+  TransactionRepository get _repository =>
+      ref.read(transactionRepositoryProvider);
+
   @override
-  List<ExpenseTransaction> build() {
-    return [
-      ExpenseTransaction(
-        id: '1',
-        title: 'Cash, EUR',
-        amount: 354.25,
-        date: DateTime(2026, 1, 12),
-        type: TransactionType.expense,
-        category: 'Cash',
-        account: 'Red Card',
-      ),
-      ExpenseTransaction(
-        id: '2',
-        title: 'Cafes',
-        amount: 12.49,
-        date: DateTime(2026, 1, 12),
-        type: TransactionType.expense,
-        category: 'Cafe',
-        account: 'Vacation',
-      ),
-      ExpenseTransaction(
-        id: '3',
-        title: 'Groceries',
-        amount: 86.40,
-        date: DateTime(2026, 1, 12),
-        type: TransactionType.expense,
-        category: 'Groceries',
-        account: 'Debit Card',
-      ),
-    ];
+  Future<List<ExpenseTransaction>> build() {
+    final repository = ref.watch(transactionRepositoryProvider);
+
+    return repository.getTransactions();
   }
 
-  void addTransaction(ExpenseTransaction transaction) {
-    state = [transaction, ...state];
+  Future<void> addTransaction(ExpenseTransaction transaction) async {
+    await _repository.addTransaction(transaction);
+
+    await _reloadTransactions();
   }
 
-  void updateTransaction(ExpenseTransaction updatedTransaction) {
-    state = [
-      for (final transaction in state)
-        if (transaction.id == updatedTransaction.id)
-          updatedTransaction
-        else
-          transaction,
-    ];
+  Future<void> updateTransaction(ExpenseTransaction transaction) async {
+    await _repository.updateTransaction(transaction);
+
+    await _reloadTransactions();
   }
 
-  void removeTransaction(String id) {
-    state = state.where((transaction) => transaction.id != id).toList();
+  Future<void> removeTransaction(String id) async {
+    await _repository.deleteTransaction(id);
+
+    await _reloadTransactions();
+  }
+
+  Future<void> _reloadTransactions() async {
+    final transactions = await _repository.getTransactions();
+
+    state = AsyncData(transactions);
   }
 }

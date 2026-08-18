@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:expense_tracker/models/transaction.dart';
 import 'package:expense_tracker/providers/transaction_provider.dart';
+import 'package:expense_tracker/core/utils/app_formatters.dart';
 
 class AddTransactionScreen extends ConsumerStatefulWidget {
   final ExpenseTransaction? transaction;
@@ -21,6 +22,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   final TextEditingController _noteController = TextEditingController();
 
   TransactionType _selectedType = TransactionType.expense;
+
+  bool _isSaving = false;
 
   String? _selectedCategory;
   String? _selectedAccount;
@@ -121,7 +124,11 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     }
   }
 
-  void _submitTransaction() {
+  Future<void> _submitTransaction() async {
+    if (_isSaving) {
+      return;
+    }
+
     FocusScope.of(context).unfocus();
 
     final bool isValid = _formKey.currentState?.validate() ?? false;
@@ -153,15 +160,39 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       note: note.isEmpty ? null : note,
     );
 
-    final controller = ref.read(transactionsProvider.notifier);
+    setState(() {
+      _isSaving = true;
+    });
 
-    if (existingTransaction == null) {
-      controller.addTransaction(transaction);
-    } else {
-      controller.updateTransaction(transaction);
+    try {
+      final controller = ref.read(transactionsProvider.notifier);
+
+      if (existingTransaction == null) {
+        await controller.addTransaction(transaction);
+      } else {
+        await controller.updateTransaction(transaction);
+      }
+
+      if (!mounted) {
+        return;
+      }
+
+      Navigator.of(context).pop(true);
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _isSaving = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not save transaction. Please try again.'),
+        ),
+      );
     }
-
-    Navigator.of(context).pop(true);
   }
 
   @override
@@ -270,7 +301,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
                 _SelectionField(
                   icon: Icons.calendar_today_rounded,
-                  text: _formatDate(_selectedDate),
+                  text: AppFormatters.date(_selectedDate),
                   onTap: _selectDate,
                 ),
 
@@ -326,11 +357,23 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 const SizedBox(height: 36),
 
                 ElevatedButton(
-                  onPressed: _submitTransaction,
-                  child: Text(
-                    isEditing ? 'Save Changes' : 'Add Transaction',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-                  ),
+                  onPressed: _isSaving ? null : _submitTransaction,
+                  child: _isSaving
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Text(
+                          isEditing ? 'Save Changes' : 'Add Transaction',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                 ),
               ],
             ),
@@ -338,27 +381,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         ),
       ),
     );
-  }
-
-  String _formatDate(DateTime date) {
-    const List<String> months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
-
-    return '${months[date.month - 1]} '
-        '${date.day}, '
-        '${date.year}';
   }
 }
 
