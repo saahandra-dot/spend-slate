@@ -36,4 +36,34 @@ class AppFormatters {
   static String monthYear(DateTime date, {String locale = defaultLocale}) {
     return DateFormat.yMMMM(locale).format(date);
   }
+
+  static bool _isSameDay(DateTime first, DateTime second) {
+    return first.year == second.year &&
+        first.month == second.month &&
+        first.day == second.day;
+  }
+
+  static String transactionGroupDate(
+    DateTime date, {
+    DateTime? now,
+    String locale = defaultLocale,
+  }) {
+    final DateTime current = now ?? DateTime.now();
+
+    if (_isSameDay(date, current)) {
+      return 'Today';
+    }
+
+    final DateTime yesterday = DateTime(
+      current.year,
+      current.month,
+      current.day - 1,
+    );
+
+    if (_isSameDay(date, yesterday)) {
+      return 'Yesterday';
+    }
+
+    return DateFormat.yMMMMd(locale).format(date);
+  }
 }

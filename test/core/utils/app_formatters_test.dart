@@ -26,4 +26,29 @@ void main() {
       expect(AppFormatters.monthYear(DateTime(2026, 8, 16)), 'August 2026');
     });
   });
+
+  group('transaction group dates', () {
+    final DateTime now = DateTime(2026, 8, 17);
+
+    test('returns Today for current date', () {
+      expect(
+        AppFormatters.transactionGroupDate(DateTime(2026, 8, 17), now: now),
+        'Today',
+      );
+    });
+
+    test('returns Yesterday for previous date', () {
+      expect(
+        AppFormatters.transactionGroupDate(DateTime(2026, 8, 16), now: now),
+        'Yesterday',
+      );
+    });
+
+    test('formats older dates normally', () {
+      expect(
+        AppFormatters.transactionGroupDate(DateTime(2026, 8, 15), now: now),
+        'August 15, 2026',
+      );
+    });
+  });
 }

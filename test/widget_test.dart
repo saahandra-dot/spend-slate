@@ -119,4 +119,138 @@ void main() {
 
     expect(find.text('1 transaction'), findsOneWidget);
   });
+
+  testWidgets('search filters transactions', (WidgetTester tester) async {
+    final repository = TransactionRepository(database);
+
+    await repository.addTransaction(
+      ExpenseTransaction(
+        id: 'groceries',
+        title: 'Groceries',
+        amount: 100,
+        date: DateTime(2026, 8, 17),
+        type: TransactionType.expense,
+        category: 'Groceries',
+        account: 'Debit Card',
+      ),
+    );
+
+    await repository.addTransaction(
+      ExpenseTransaction(
+        id: 'cafe',
+        title: 'Cafe',
+        amount: 25,
+        date: DateTime(2026, 8, 17),
+        type: TransactionType.expense,
+        category: 'Cafe',
+        account: 'Cash',
+      ),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [appDatabaseProvider.overrideWithValue(database)],
+        child: const ExpenseTrackerApp(),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    final viewAll = find.text('View All');
+
+    await tester.ensureVisible(viewAll);
+
+    await tester.pumpAndSettle();
+
+    await tester.tap(viewAll);
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Groceries'), findsOneWidget);
+
+    expect(find.text('Cafe'), findsOneWidget);
+
+    final searchField = find.byKey(const Key('transactionSearchField'));
+
+    expect(searchField, findsOneWidget);
+
+    await tester.enterText(searchField, 'groc');
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Groceries'), findsOneWidget);
+
+    expect(find.text('Cafe'), findsNothing);
+
+    await tester.enterText(searchField, 'something impossible');
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('No matching transactions'), findsOneWidget);
+
+    expect(find.text('Groceries'), findsNothing);
+
+    expect(find.text('Cafe'), findsNothing);
+  });
+
+  testWidgets('expense filter hides income transactions', (
+    WidgetTester tester,
+  ) async {
+    final repository = TransactionRepository(database);
+
+    await repository.addTransaction(
+      ExpenseTransaction(
+        id: 'salary',
+        title: 'Salary',
+        amount: 5000,
+        date: DateTime(2026, 8, 18),
+        type: TransactionType.income,
+        category: 'Salary',
+        account: 'Savings',
+      ),
+    );
+
+    await repository.addTransaction(
+      ExpenseTransaction(
+        id: 'groceries',
+        title: 'Groceries',
+        amount: 200,
+        date: DateTime(2026, 8, 18),
+        type: TransactionType.expense,
+        category: 'Groceries',
+        account: 'Debit Card',
+      ),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [appDatabaseProvider.overrideWithValue(database)],
+        child: const ExpenseTrackerApp(),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    final viewAll = find.text('View All');
+
+    await tester.ensureVisible(viewAll);
+
+    await tester.pumpAndSettle();
+
+    await tester.tap(viewAll);
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Salary'), findsOneWidget);
+
+    expect(find.text('Groceries'), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(ChoiceChip, 'Expense'));
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Groceries'), findsOneWidget);
+
+    expect(find.text('Salary'), findsNothing);
+  });
 }
