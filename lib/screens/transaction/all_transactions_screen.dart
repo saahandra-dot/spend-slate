@@ -1,3 +1,4 @@
+import 'package:expense_tracker/providers/period_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -177,7 +178,7 @@ class _AllTransactionsScreenState extends ConsumerState<AllTransactionsScreen> {
         error: (error, stackTrace) {
           return _ErrorState(
             onRetry: () {
-              ref.invalidate(transactionsProvider);
+              ref.invalidate(monthlyTransactionsProvider);
             },
           );
         },

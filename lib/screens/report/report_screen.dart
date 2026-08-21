@@ -1,11 +1,13 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fl_chart/fl_chart.dart';
 
-import 'package:expense_tracker/core/theme/app_colors.dart';
-import 'package:expense_tracker/core/utils/app_formatters.dart';
-import 'package:expense_tracker/models/transaction.dart';
-import 'package:expense_tracker/providers/transaction_provider.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/utils/app_formatters.dart';
+import '../../core/widgets/month_picker_sheet.dart';
+import '../../models/transaction.dart';
+import '../../providers/period_provider.dart';
+import '../../providers/transaction_provider.dart';
 
 enum _ReportType { expenses, income }
 
@@ -18,21 +20,12 @@ class ReportScreen extends ConsumerStatefulWidget {
 
 class _ReportScreenState extends ConsumerState<ReportScreen> {
   _ReportType _selectedType = _ReportType.expenses;
-  late DateTime _selectedMonth;
-
-  @override
-  void initState() {
-    super.initState();
-
-    final DateTime now = DateTime.now();
-
-    _selectedMonth = DateTime(now.year, now.month);
-  }
 
   TransactionType get _transactionType {
     switch (_selectedType) {
       case _ReportType.expenses:
         return TransactionType.expense;
+
       case _ReportType.income:
         return TransactionType.income;
     }
@@ -42,6 +35,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
     switch (_selectedType) {
       case _ReportType.expenses:
         return 'Expenses Report';
+
       case _ReportType.income:
         return 'Income Report';
     }
@@ -50,43 +44,18 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
   String get _emptyMessage {
     switch (_selectedType) {
       case _ReportType.expenses:
-        return 'No expenses recorded for this month';
+        return 'No expenses recorded for this month.';
+
       case _ReportType.income:
         return 'No income recorded for this month.';
     }
   }
 
-  Future<void> _openMonthPicker() async {
-    final DateTime? selectedMonth = await showModalBottomSheet(
-      context: context,
-      useSafeArea: true,
-      showDragHandle: true,
-      backgroundColor: AppColors.surface,
-      builder: (context) {
-        return _MonthPickerSheet(initialMonth: _selectedMonth);
-      },
-    );
-
-    if (!mounted || selectedMonth == null) {
-      return;
-    }
-
-    setState(() {
-      _selectedMonth = selectedMonth;
-    });
-  }
-
-  List<ExpenseTransaction> _filterTransactions(
+  List<ExpenseTransaction> _filterByType(
     List<ExpenseTransaction> transactions,
   ) {
     return transactions.where((transaction) {
-      final bool matchesMonth =
-          transaction.date.year == _selectedMonth.year &&
-          transaction.date.month == _selectedMonth.month;
-
-      final bool matchesType = transaction.type == _transactionType;
-
-      return matchesMonth && matchesType;
+      return transaction.type == _transactionType;
     }).toList();
   }
 
@@ -140,7 +109,10 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final transactionAsync = ref.watch(transactionsProvider);
+    final DateTime selectedMonth = ref.watch(selectedMonthProvider);
+
+    final transactionsAsync = ref.watch(monthlyTransactionsProvider);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -149,7 +121,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
             const _ReportHeader(),
 
             Expanded(
-              child: transactionAsync.when(
+              child: transactionsAsync.when(
                 loading: () {
                   return const Center(child: CircularProgressIndicator());
                 },
@@ -161,15 +133,16 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                   );
                 },
                 data: (transactions) {
-                  final filteredTransactions = _filterTransactions(
-                    transactions,
-                  );
+                  final List<ExpenseTransaction> filteredTransactions =
+                      _filterByType(transactions);
+
                   final double total = filteredTransactions.fold(0.0, (
                     currentTotal,
                     transaction,
                   ) {
                     return currentTotal + transaction.amount;
                   });
+
                   final List<_CategorySummary> categorySummaries =
                       _calculateCategorySummaries(filteredTransactions);
 
@@ -185,30 +158,51 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                             });
                           },
                         ),
+
                         const SizedBox(height: 24),
+
                         _MonthSelector(
-                          selectedMonth: _selectedMonth,
-                          onTap: _openMonthPicker,
+                          selectedMonth: selectedMonth,
+                          onTap: () async {
+                            final DateTime? month = await showAppMonthPicker(
+                              context: context,
+                              initialMonth: selectedMonth,
+                            );
+
+                            if (!mounted || month == null) {
+                              return;
+                            }
+
+                            ref
+                                .read(selectedMonthProvider.notifier)
+                                .setMonth(month);
+                          },
                         ),
+
                         const SizedBox(height: 30),
+
                         Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
                             _reportTitle,
                             style: const TextStyle(
-                              fontSize: 24,
+                              fontSize: 23,
                               fontWeight: FontWeight.w700,
                               color: AppColors.textPrimary,
                             ),
                           ),
                         ),
+
                         const SizedBox(height: 22),
+
                         _ReportTotalCard(
                           total: total,
                           transactionCount: filteredTransactions.length,
                           categories: categorySummaries,
                         ),
+
                         const SizedBox(height: 28),
+
                         _CategoryBreakdownSection(
                           categories: categorySummaries,
                           emptyMessage: _emptyMessage,
@@ -295,53 +289,53 @@ class _ReportTypeSelector extends StatelessWidget {
   }
 }
 
-class _ReportErrorState extends StatelessWidget {
-  final VoidCallback onRetry;
+class _MonthSelector extends StatelessWidget {
+  final DateTime selectedMonth;
+  final VoidCallback onTap;
 
-  const _ReportErrorState({required this.onRetry});
+  const _MonthSelector({required this.selectedMonth, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.error_outline_rounded,
-              size: 42,
-              color: AppColors.expense,
-            ),
-
-            const SizedBox(height: 16),
-
-            const Text(
-              'Unable to load report',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+    return Material(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.divider),
+          ),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.calendar_month_rounded,
+                size: 20,
+                color: AppColors.primaryPurple,
               ),
-            ),
 
-            const SizedBox(height: 8),
+              const SizedBox(width: 12),
 
-            const Text(
-              'Your transaction data '
-              'could not be loaded.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.textSecondary),
-            ),
+              Expanded(
+                child: Text(
+                  AppFormatters.monthYear(selectedMonth),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
 
-            const SizedBox(height: 18),
-
-            TextButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Try Again'),
-            ),
-          ],
+              const Icon(
+                Icons.keyboard_arrow_down_rounded,
+                color: AppColors.textSecondary,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -382,11 +376,12 @@ class _ReportTotalCard extends StatelessWidget {
       child: Column(
         children: [
           _ReportDonutChart(total: total, categories: categories),
+
           const SizedBox(height: 18),
 
           _ReportChartLegend(categories: categories),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 22),
 
           const Divider(),
 
@@ -436,7 +431,7 @@ class _ReportDonutChartState extends State<_ReportDonutChart> {
   void didUpdateWidget(covariant _ReportDonutChart oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (_touchedIndex >= widget.categories.length) {
+    if (oldWidget.categories != widget.categories) {
       _touchedIndex = -1;
     }
   }
@@ -472,6 +467,7 @@ class _ReportDonutChartState extends State<_ReportDonutChart> {
                         pieTouchResponse == null ||
                         pieTouchResponse.touchedSection == null) {
                       _touchedIndex = -1;
+
                       return;
                     }
 
@@ -498,13 +494,15 @@ class _ReportDonutChartState extends State<_ReportDonutChart> {
 
   List<PieChartSectionData> _buildSections() {
     return List.generate(widget.categories.length, (index) {
-      final summary = widget.categories[index];
+      final _CategorySummary summary = widget.categories[index];
 
       final bool isTouched = index == _touchedIndex;
 
+      final Color color = _getCategoryColor(summary.category);
+
       return PieChartSectionData(
         value: summary.amount,
-        color: _getCategoryColor(summary.category),
+        color: color,
         radius: isTouched ? 34 : 27,
         showTitle: false,
         borderSide: isTouched
@@ -515,110 +513,9 @@ class _ReportDonutChartState extends State<_ReportDonutChart> {
   }
 }
 
-class _ReportChartLegend extends StatelessWidget {
-  final List<_CategorySummary> categories;
-
-  const _ReportChartLegend({required this.categories});
-
-  @override
-  Widget build(BuildContext context) {
-    if (categories.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    final visibleCategories = categories.take(4).toList();
-
-    return Wrap(
-      alignment: WrapAlignment.center,
-      spacing: 14,
-      runSpacing: 10,
-      children: [
-        for (final category in visibleCategories)
-          _LegendItem(
-            category: category.category,
-            color: _getCategoryColor(category.category),
-          ),
-      ],
-    );
-  }
-}
-
-class _LegendItem extends StatelessWidget {
-  final String category;
-  final Color color;
-
-  const _LegendItem({required this.category, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-        const SizedBox(width: 6),
-        Text(
-          category,
-          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-        ),
-      ],
-    );
-  }
-}
-
-class _EmptyDonutChart extends StatelessWidget {
-  final double total;
-
-  const _EmptyDonutChart({required this.total});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 240,
-      height: 240,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Container(
-            width: 190,
-            height: 190,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: AppColors.divider, width: 26),
-            ),
-          ),
-
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Total',
-                style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-              ),
-
-              const SizedBox(height: 6),
-
-              Text(
-                AppFormatters.currency(total),
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _DonutCenterContent extends StatelessWidget {
   final double total;
+
   final _CategorySummary? selectedCategory;
 
   const _DonutCenterContent({
@@ -704,140 +601,47 @@ class _DonutCenterContent extends StatelessWidget {
   }
 }
 
-class _MonthSelector extends StatelessWidget {
-  final DateTime selectedMonth;
-  final VoidCallback onTap;
+class _EmptyDonutChart extends StatelessWidget {
+  final double total;
 
-  const _MonthSelector({required this.selectedMonth, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.surface,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.divider),
-          ),
-          child: Row(
-            children: [
-              const Icon(
-                Icons.calendar_month_rounded,
-                size: 20,
-                color: AppColors.primaryPurple,
-              ),
-
-              const SizedBox(width: 12),
-
-              Expanded(
-                child: Text(
-                  AppFormatters.monthYear(selectedMonth),
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ),
-
-              const Icon(
-                Icons.keyboard_arrow_down_rounded,
-                color: AppColors.textSecondary,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _MonthPickerSheet extends StatefulWidget {
-  final DateTime initialMonth;
-
-  const _MonthPickerSheet({required this.initialMonth});
-
-  @override
-  State<_MonthPickerSheet> createState() => __MonthPickerSheetState();
-}
-
-class __MonthPickerSheetState extends State<_MonthPickerSheet> {
-  late int _selectedYear;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedYear = widget.initialMonth.year;
-  }
+  const _EmptyDonutChart({required this.total});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+    return SizedBox(
+      width: 240,
+      height: 240,
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          Row(
+          Container(
+            width: 190,
+            height: 190,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.divider, width: 26),
+            ),
+          ),
+
+          Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              IconButton(
-                onPressed: () {
-                  setState(() {
-                    _selectedYear--;
-                  });
-                },
-                icon: const Icon(Icons.chevron_left_rounded),
+              const Text(
+                'Total',
+                style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
               ),
-              Expanded(
-                child: Text(
-                  '$_selectedYear',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
+
+              const SizedBox(height: 6),
+
+              Text(
+                AppFormatters.currency(total),
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
                 ),
               ),
-              IconButton(
-                onPressed: () {
-                  setState(() {
-                    _selectedYear++;
-                  });
-                },
-                icon: const Icon(Icons.chevron_right_rounded),
-              ),
             ],
-          ),
-          const SizedBox(height: 12),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: 12,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              childAspectRatio: 2.2,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-            ),
-            itemBuilder: (context, index) {
-              final int month = index + 1;
-              final DateTime date = DateTime(_selectedYear, month);
-              final bool isSelected =
-                  widget.initialMonth.year == _selectedYear &&
-                  widget.initialMonth.month == month;
-              return _MonthButton(
-                date: date,
-                selected: isSelected,
-                onTap: () {
-                  Navigator.of(context).pop(date);
-                },
-              );
-            },
           ),
         ],
       ),
@@ -845,40 +649,60 @@ class __MonthPickerSheetState extends State<_MonthPickerSheet> {
   }
 }
 
-class _MonthButton extends StatelessWidget {
-  final DateTime date;
-  final bool selected;
-  final VoidCallback onTap;
+class _ReportChartLegend extends StatelessWidget {
+  final List<_CategorySummary> categories;
 
-  const _MonthButton({
-    required this.date,
-    required this.selected,
-    required this.onTap,
-  });
+  const _ReportChartLegend({required this.categories});
 
   @override
   Widget build(BuildContext context) {
-    final String month = AppFormatters.shortDate(
-      DateTime(date.year, date.month, 1),
-    ).split(' ').first;
+    if (categories.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
-    return Material(
-      color: selected ? AppColors.primaryPurple : AppColors.background,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Center(
-          child: Text(
-            month,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: selected ? Colors.white : AppColors.textPrimary,
-            ),
+    final List<_CategorySummary> visibleCategories = categories
+        .take(4)
+        .toList();
+
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 14,
+      runSpacing: 10,
+      children: [
+        for (final category in visibleCategories)
+          _LegendItem(
+            category: category.category,
+            color: _getCategoryColor(category.category),
           ),
+      ],
+    );
+  }
+}
+
+class _LegendItem extends StatelessWidget {
+  final String category;
+  final Color color;
+
+  const _LegendItem({required this.category, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
-      ),
+
+        const SizedBox(width: 6),
+
+        Text(
+          category,
+          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+        ),
+      ],
     );
   }
 }
@@ -950,6 +774,111 @@ class _CategoryBreakdownSection extends StatelessWidget {
   }
 }
 
+class _CategoryBreakdownTile extends StatelessWidget {
+  final _CategorySummary summary;
+
+  const _CategoryBreakdownTile({required this.summary});
+
+  @override
+  Widget build(BuildContext context) {
+    final Color categoryColor = _getCategoryColor(summary.category);
+
+    final IconData categoryIcon = _getCategoryIcon(summary.category);
+
+    final String countText = summary.transactionCount == 1
+        ? '1 transaction'
+        : '${summary.transactionCount} transactions';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: categoryColor.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(categoryIcon, color: categoryColor, size: 21),
+            ),
+
+            const SizedBox(width: 12),
+
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    summary.category,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+
+                  const SizedBox(height: 4),
+
+                  Text(
+                    countText,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(width: 12),
+
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  AppFormatters.currency(summary.amount),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+
+                const SizedBox(height: 4),
+
+                Text(
+                  '${summary.percentage.toStringAsFixed(1)}%',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: categoryColor,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 13),
+
+        ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: LinearProgressIndicator(
+            minHeight: 7,
+            value: summary.percentage / 100,
+            backgroundColor: AppColors.divider,
+            valueColor: AlwaysStoppedAnimation<Color>(categoryColor),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _NoReportData extends StatelessWidget {
   final String message;
 
@@ -993,93 +922,55 @@ class _NoReportData extends StatelessWidget {
   }
 }
 
-class _CategoryBreakdownTile extends StatelessWidget {
-  final _CategorySummary summary;
-  const _CategoryBreakdownTile({required this.summary});
+class _ReportErrorState extends StatelessWidget {
+  final VoidCallback onRetry;
+
+  const _ReportErrorState({required this.onRetry});
 
   @override
   Widget build(BuildContext context) {
-    final Color categoryColor = _getCategoryColor(summary.category);
-    final IconData categoryIcon = _getCategoryIcon(summary.category);
-    final String countText = summary.transactionCount == 1
-        ? '1 transaction'
-        : '${summary.transactionCount} transactions';
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: categoryColor.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Icon(categoryIcon, color: categoryColor, size: 21),
+            const Icon(
+              Icons.error_outline_rounded,
+              size: 42,
+              color: AppColors.expense,
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    summary.category,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    countText,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
+
+            const SizedBox(height: 16),
+
+            const Text(
+              'Unable to load report',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
               ),
             ),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  AppFormatters.currency(summary.amount),
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${summary.percentage.toStringAsFixed(1)}%',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: categoryColor,
-                  ),
-                ),
-              ],
+
+            const SizedBox(height: 8),
+
+            const Text(
+              'Your transaction data could not be loaded.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
+
+            const SizedBox(height: 18),
+
+            TextButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded),
+              label: const Text('Try Again'),
             ),
           ],
         ),
-        const SizedBox(height: 13),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: LinearProgressIndicator(
-            minHeight: 7,
-            value: summary.percentage / 100,
-            backgroundColor: AppColors.divider,
-            valueColor: AlwaysStoppedAnimation<Color>(categoryColor),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

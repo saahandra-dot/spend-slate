@@ -8,13 +8,14 @@ import '../../transaction/add_transaction_screen.dart';
 import '../../transaction/transaction_details_screen.dart';
 import '../../transaction/all_transactions_screen.dart';
 import 'transaction_tile.dart';
+import '../../../providers/period_provider.dart';
 
 class TransactionsSection extends ConsumerWidget {
   const TransactionsSection({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final transactionsAsync = ref.watch(transactionsProvider);
+    final transactionsAsync = ref.watch(monthlyTransactionsProvider);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
@@ -61,7 +62,7 @@ class TransactionsSection extends ConsumerWidget {
 
               final previewTransactions = transactions.take(5).toList();
 
-              final double totalExpenses = ref.watch(totalExpensesProvider);
+              final double totalExpenses = ref.watch(monthlyExpensesProvider);
 
               return Column(
                 children: [
@@ -224,7 +225,7 @@ class _EmptyTransactionsState extends StatelessWidget {
           const SizedBox(height: 20),
 
           const Text(
-            'No transactions yet',
+            'No transactions this month',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 18,

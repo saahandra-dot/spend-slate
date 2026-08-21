@@ -66,4 +66,8 @@ class AppFormatters {
 
     return DateFormat.yMMMMd(locale).format(date);
   }
+
+  static String shortMonth(DateTime date, {String locale = defaultLocale}) {
+    return DateFormat.MMM(locale).format(date);
+  }
 }

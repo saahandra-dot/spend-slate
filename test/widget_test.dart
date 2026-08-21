@@ -21,8 +21,8 @@ void main() {
   });
 
   testWidgets(
-    'Expense Tracker shows empty state when there are no transactions',
-    (WidgetTester tester) async {
+    'Expense Tracker shows monthly empty state when there are no transactions',
+    (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [appDatabaseProvider.overrideWithValue(database)],
@@ -36,7 +36,7 @@ void main() {
 
       expect(find.text('Current Balance'), findsOneWidget);
 
-      expect(find.text('No transactions yet'), findsOneWidget);
+      expect(find.text('No transactions this month'), findsOneWidget);
 
       expect(find.text('Transactions'), findsOneWidget);
     },
@@ -54,7 +54,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(find.text('No transactions yet'), findsOneWidget);
+    expect(find.text('No transactions this month'), findsOneWidget);
 
     final addButton = find.widgetWithText(ElevatedButton, 'Add Transaction');
 
