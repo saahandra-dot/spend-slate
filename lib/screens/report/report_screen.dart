@@ -8,6 +8,8 @@ import '../../core/widgets/month_picker_sheet.dart';
 import '../../models/transaction.dart';
 import '../../providers/period_provider.dart';
 import '../../providers/transaction_provider.dart';
+import '../../core/data/category_catalog.dart';
+import '../../core/theme/category_visuals.dart';
 
 enum _ReportType { expenses, income }
 
@@ -96,6 +98,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
 
       return _CategorySummary(
         category: entry.key,
+        type: transactions.first.type,
         amount: entry.value,
         percentage: percentage,
         transactionCount: categoryCounts[entry.key] ?? 0,
@@ -110,6 +113,20 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
   @override
   Widget build(BuildContext context) {
     final DateTime selectedMonth = ref.watch(selectedMonthProvider);
+
+    final DateTime previousMonth = ref.watch(previousMonthProvider);
+
+    final MonthlyComparison incomeComparison = ref.watch(
+      monthlyIncomeComparisonProvider,
+    );
+
+    final MonthlyComparison expenseComparison = ref.watch(
+      monthlyExpenseComparisonProvider,
+    );
+
+    final MonthlyComparison comparison = _selectedType == _ReportType.expenses
+        ? expenseComparison
+        : incomeComparison;
 
     final transactionsAsync = ref.watch(monthlyTransactionsProvider);
 
@@ -199,6 +216,14 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                           total: total,
                           transactionCount: filteredTransactions.length,
                           categories: categorySummaries,
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        _MonthComparisonCard(
+                          comparison: comparison,
+                          previousMonth: previousMonth,
+                          reportType: _selectedType,
                         ),
 
                         const SizedBox(height: 28),
@@ -414,6 +439,155 @@ class _ReportTotalCard extends StatelessWidget {
   }
 }
 
+class _MonthComparisonCard extends StatelessWidget {
+  final MonthlyComparison comparison;
+  final DateTime previousMonth;
+  final _ReportType reportType;
+
+  const _MonthComparisonCard({
+    required this.comparison,
+    required this.previousMonth,
+    required this.reportType,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isExpense = reportType == _ReportType.expenses;
+
+    final bool increased = comparison.increased;
+
+    final bool decreased = comparison.decreased;
+
+    final bool unchanged = comparison.unchanged;
+
+    final bool isPositiveChange = isExpense ? decreased : increased;
+
+    final Color statusColor = unchanged
+        ? AppColors.textSecondary
+        : isPositiveChange
+        ? AppColors.positive
+        : AppColors.expense;
+
+    final IconData statusIcon = unchanged
+        ? Icons.remove_rounded
+        : increased
+        ? Icons.arrow_upward_rounded
+        : Icons.arrow_downward_rounded;
+
+    final String previousMonthLabel = AppFormatters.monthYear(previousMonth);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.divider),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Compared with $previousMonthLabel',
+            style: const TextStyle(
+              fontSize: 13,
+              color: AppColors.textSecondary,
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.10),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(statusIcon, color: statusColor, size: 20),
+              ),
+
+              const SizedBox(width: 12),
+
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _differenceText(),
+                      style: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+
+                    const SizedBox(height: 4),
+
+                    Text(
+                      _comparisonText(),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: statusColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              Text(
+                AppFormatters.currency(comparison.previous),
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _differenceText() {
+    final double difference = comparison.difference;
+
+    if (difference == 0) {
+      return 'No change';
+    }
+
+    final String sign = difference > 0 ? '+' : '-';
+
+    return '$sign${AppFormatters.currency(difference.abs())}';
+  }
+
+  String _comparisonText() {
+    if (comparison.unchanged) {
+      return 'Same as previous month';
+    }
+
+    final double? percentage = comparison.percentageChange;
+
+    if (percentage == null) {
+      if (comparison.previous == 0) {
+        return reportType == _ReportType.expenses
+            ? 'No expenses in previous month'
+            : 'No income in previous month';
+      }
+
+      return 'No percentage available';
+    }
+
+    final String direction = percentage > 0 ? 'higher' : 'lower';
+
+    return '${percentage.abs().toStringAsFixed(1)}% $direction';
+  }
+}
+
 class _ReportDonutChart extends StatefulWidget {
   final double total;
   final List<_CategorySummary> categories;
@@ -498,7 +672,7 @@ class _ReportDonutChartState extends State<_ReportDonutChart> {
 
       final bool isTouched = index == _touchedIndex;
 
-      final Color color = _getCategoryColor(summary.category);
+      final Color color = _categoryColor(summary);
 
       return PieChartSectionData(
         value: summary.amount,
@@ -564,7 +738,7 @@ class _DonutCenterContent extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
-                color: _getCategoryColor(selectedCategory!.category),
+                color: _categoryColor(selectedCategory!),
               ),
             ),
           ],
@@ -672,7 +846,7 @@ class _ReportChartLegend extends StatelessWidget {
         for (final category in visibleCategories)
           _LegendItem(
             category: category.category,
-            color: _getCategoryColor(category.category),
+            color: _categoryColor(category),
           ),
       ],
     );
@@ -781,9 +955,9 @@ class _CategoryBreakdownTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color categoryColor = _getCategoryColor(summary.category);
+    final Color categoryColor = _categoryColor(summary);
 
-    final IconData categoryIcon = _getCategoryIcon(summary.category);
+    final IconData categoryIcon = _categoryIcon(summary);
 
     final String countText = summary.transactionCount == 1
         ? '1 transaction'
@@ -977,114 +1151,28 @@ class _ReportErrorState extends StatelessWidget {
 
 class _CategorySummary {
   final String category;
+  final TransactionType type;
   final double amount;
   final double percentage;
   final int transactionCount;
 
   const _CategorySummary({
     required this.category,
+    required this.type,
     required this.amount,
     required this.percentage,
     required this.transactionCount,
   });
 }
 
-Color _getCategoryColor(String category) {
-  switch (category.toLowerCase()) {
-    case 'groceries':
-      return AppColors.green;
+Color _categoryColor(_CategorySummary summary) {
+  final category = CategoryCatalog.find(summary.category, summary.type);
 
-    case 'cafe':
-    case 'cafes':
-      return AppColors.orange;
-
-    case 'clothing':
-      return AppColors.primaryPurple;
-
-    case 'transport':
-      return AppColors.blue;
-
-    case 'entertainment':
-      return AppColors.primaryPurple;
-
-    case 'health':
-      return AppColors.expense;
-
-    case 'education':
-      return AppColors.blue;
-
-    case 'bills':
-      return AppColors.orange;
-
-    case 'salary':
-      return AppColors.positive;
-
-    case 'freelance':
-      return AppColors.blue;
-
-    case 'business':
-      return AppColors.primaryPurple;
-
-    case 'investment':
-      return AppColors.positive;
-
-    case 'gift':
-      return AppColors.orange;
-
-    case 'other income':
-      return AppColors.textSecondary;
-
-    default:
-      return AppColors.primaryPurple;
-  }
+  return category?.colorKey.color ?? AppColors.primaryPurple;
 }
 
-IconData _getCategoryIcon(String category) {
-  switch (category.toLowerCase()) {
-    case 'groceries':
-      return Icons.shopping_basket_rounded;
+IconData _categoryIcon(_CategorySummary summary) {
+  final category = CategoryCatalog.find(summary.category, summary.type);
 
-    case 'cafe':
-    case 'cafes':
-      return Icons.local_cafe_rounded;
-
-    case 'clothing':
-      return Icons.checkroom_rounded;
-
-    case 'transport':
-      return Icons.directions_car_rounded;
-
-    case 'entertainment':
-      return Icons.movie_rounded;
-
-    case 'health':
-      return Icons.favorite_rounded;
-
-    case 'education':
-      return Icons.school_rounded;
-
-    case 'bills':
-      return Icons.receipt_long_rounded;
-
-    case 'salary':
-      return Icons.payments_rounded;
-
-    case 'freelance':
-      return Icons.work_rounded;
-
-    case 'business':
-      return Icons.business_center_rounded;
-
-    case 'investment':
-      return Icons.trending_up_rounded;
-
-    case 'gift':
-      return Icons.card_giftcard_rounded;
-
-    case 'other income':
-      return Icons.attach_money_rounded;
-
-    default:
-      return Icons.category_rounded;
-  }
+  return category?.iconKey.iconData ?? Icons.category_rounded;
 }

@@ -5,6 +5,7 @@ import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:expense_tracker/models/transaction.dart';
 import 'package:expense_tracker/providers/transaction_provider.dart';
 import 'package:expense_tracker/core/utils/app_formatters.dart';
+import 'package:expense_tracker/core/data/category_catalog.dart';
 
 class AddTransactionScreen extends ConsumerStatefulWidget {
   final ExpenseTransaction? transaction;
@@ -30,41 +31,35 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
   DateTime _selectedDate = DateTime.now();
 
-  final List<String> _expenseCategories = [
-    'Groceries',
-    'Cafe',
-    'Clothing',
-    'Transport',
-    'Entertainment',
-    'Health',
-    'Education',
-    'Bills',
-    'Salary',
-    'Other',
-  ];
-
-  final List<String> _incomeCategories = [
-    'Salary',
-    'Freelance',
-    'Business',
-    'Investment',
-    'Gift',
-    'Other Income',
-  ];
-
   List<String> get _availableCategories {
-    final List<String> categories = _selectedType == TransactionType.income
-        ? [..._incomeCategories]
-        : [..._expenseCategories];
+    final List<String> categories = CategoryCatalog.forType(
+      _selectedType,
+    ).map((category) => category.name).toList();
 
-    final selectedCategory = _selectedCategory;
+    final String? selectedCategory = _selectedCategory;
 
-    if (selectedCategory != null && !categories.contains(selectedCategory)) {
+    if (selectedCategory != null &&
+        selectedCategory.isNotEmpty &&
+        !categories.contains(selectedCategory)) {
       categories.add(selectedCategory);
     }
 
     return categories;
   }
+
+  // List<String> get _availableCategories {
+  //   final List<String> categories = _selectedType == TransactionType.income
+  //       ? [..._incomeCategories]
+  //       : [..._expenseCategories];
+
+  //   final selectedCategory = _selectedCategory;
+
+  //   if (selectedCategory != null && !categories.contains(selectedCategory)) {
+  //     categories.add(selectedCategory);
+  //   }
+
+  //   return categories;
+  // }
 
   final List<String> _accounts = ['Debit Card', 'Credit Card', 'Savings'];
 
