@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/data/category_catalog.dart';
+import '../../../core/theme/category_visuals.dart';
+import '../../../providers/category_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/app_formatters.dart';
 import '../../../models/transaction.dart';
-import '../../../core/data/category_catalog.dart';
-import '../../../core/theme/category_visuals.dart';
 
-class TransactionTile extends StatelessWidget {
+class TransactionTile extends ConsumerWidget {
   final ExpenseTransaction transaction;
   final VoidCallback? onTap;
   final bool showDate;
@@ -19,10 +21,13 @@ class TransactionTile extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final bool isExpense = transaction.type == TransactionType.expense;
 
-    final category = CategoryCatalog.find(
+    final categories = ref.watch(categoriesForTypeProvider(transaction.type));
+
+    final category = CategoryCatalog.findIn(
+      categories,
       transaction.category,
       transaction.type,
     );

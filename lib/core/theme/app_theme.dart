@@ -50,18 +50,9 @@ class AppTheme {
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),
-        bodyLarge: TextStyle(
-          fontSize: 16,
-          color: AppColors.textPrimary,
-        ),
-        bodyMedium: TextStyle(
-          fontSize: 14,
-          color: AppColors.textSecondary,
-        ),
-        bodySmall: TextStyle(
-          fontSize: 12,
-          color: AppColors.textSecondary,
-        ),
+        bodyLarge: TextStyle(fontSize: 16, color: AppColors.textPrimary),
+        bodyMedium: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+        bodySmall: TextStyle(fontSize: 12, color: AppColors.textSecondary),
       ),
 
       dividerTheme: const DividerThemeData(
@@ -79,46 +70,38 @@ class AppTheme {
         backgroundColor: AppColors.surface,
         indicatorColor: AppColors.lightPurple,
         elevation: 0,
-        labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>(
-          (states) {
-            if (states.contains(WidgetState.selected)) {
-              return const TextStyle(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w600,
-                fontSize: 12,
-              );
-            }
-
+        labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>((states) {
+          if (states.contains(WidgetState.selected)) {
             return const TextStyle(
-              color: AppColors.textSecondary,
-              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w600,
               fontSize: 12,
             );
-          },
-        ),
+          }
+
+          return const TextStyle(
+            color: AppColors.textSecondary,
+            fontWeight: FontWeight.w500,
+            fontSize: 12,
+          );
+        }),
       ),
 
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surface,
-        hintStyle: const TextStyle(
-          color: AppColors.textLight,
-        ),
+        hintStyle: const TextStyle(color: AppColors.textLight),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 16,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(
-            color: AppColors.divider,
-          ),
+          borderSide: const BorderSide(color: AppColors.divider),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(
-            color: AppColors.divider,
-          ),
+          borderSide: const BorderSide(color: AppColors.divider),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),

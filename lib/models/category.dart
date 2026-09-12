@@ -36,4 +36,22 @@ class AppCategory {
     required this.colorKey,
     this.isBuiltIn = true,
   });
+
+  AppCategory copyWith({
+    String? id,
+    String? name,
+    TransactionType? type,
+    CategoryIconKey? iconKey,
+    CategoryColorKey? colorKey,
+    bool? isBuiltIn,
+  }) {
+    return AppCategory(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      type: type ?? this.type,
+      iconKey: iconKey ?? this.iconKey,
+      colorKey: colorKey ?? this.colorKey,
+      isBuiltIn: isBuiltIn ?? this.isBuiltIn,
+    );
+  }
 }

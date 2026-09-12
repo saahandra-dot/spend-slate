@@ -133,11 +133,29 @@ class CategoryCatalog {
   }
 
   static AppCategory? find(String name, TransactionType type) {
+    return findIn(categories, name, type);
+  }
+
+  static AppCategory? findIn(
+    Iterable<AppCategory> source,
+    String name,
+    TransactionType type,
+  ) {
     final String normalizedName = name.trim().toLowerCase();
 
-    for (final category in categories) {
+    for (final category in source) {
       if (category.type == type &&
-          category.name.toLowerCase() == normalizedName) {
+          category.name.trim().toLowerCase() == normalizedName) {
+        return category;
+      }
+    }
+
+    return null;
+  }
+
+  static AppCategory? findById(Iterable<AppCategory> source, String id) {
+    for (final category in source) {
+      if (category.id == id) {
         return category;
       }
     }

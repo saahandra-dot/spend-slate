@@ -10,6 +10,8 @@ import '../../providers/period_provider.dart';
 import '../../providers/transaction_provider.dart';
 import '../../core/data/category_catalog.dart';
 import '../../core/theme/category_visuals.dart';
+import '../../models/category.dart';
+import '../../providers/category_provider.dart';
 
 enum _ReportType { expenses, income }
 
@@ -63,6 +65,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
 
   List<_CategorySummary> _calculateCategorySummaries(
     List<ExpenseTransaction> transactions,
+    List<AppCategory> categories,
   ) {
     if (transactions.isEmpty) {
       return [];
@@ -96,9 +99,16 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
     ) {
       final double percentage = total == 0 ? 0 : (entry.value / total) * 100;
 
+      final definition = CategoryCatalog.findIn(
+        categories,
+        entry.key,
+        transactions.first.type,
+      );
+
       return _CategorySummary(
         category: entry.key,
         type: transactions.first.type,
+        definition: definition,
         amount: entry.value,
         percentage: percentage,
         transactionCount: categoryCounts[entry.key] ?? 0,
@@ -112,6 +122,9 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final List<AppCategory> categoryDefinitions =
+        ref.watch(categoriesProvider).value ?? CategoryCatalog.categories;
+
     final DateTime selectedMonth = ref.watch(selectedMonthProvider);
 
     final DateTime previousMonth = ref.watch(previousMonthProvider);
@@ -161,7 +174,10 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                   });
 
                   final List<_CategorySummary> categorySummaries =
-                      _calculateCategorySummaries(filteredTransactions);
+                      _calculateCategorySummaries(
+                        filteredTransactions,
+                        categoryDefinitions,
+                      );
 
                   return SingleChildScrollView(
                     padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
@@ -1152,6 +1168,7 @@ class _ReportErrorState extends StatelessWidget {
 class _CategorySummary {
   final String category;
   final TransactionType type;
+  final AppCategory? definition;
   final double amount;
   final double percentage;
   final int transactionCount;
@@ -1159,6 +1176,7 @@ class _CategorySummary {
   const _CategorySummary({
     required this.category,
     required this.type,
+    required this.definition,
     required this.amount,
     required this.percentage,
     required this.transactionCount,
@@ -1166,13 +1184,9 @@ class _CategorySummary {
 }
 
 Color _categoryColor(_CategorySummary summary) {
-  final category = CategoryCatalog.find(summary.category, summary.type);
-
-  return category?.colorKey.color ?? AppColors.primaryPurple;
+  return summary.definition?.colorKey.color ?? AppColors.primaryPurple;
 }
 
 IconData _categoryIcon(_CategorySummary summary) {
-  final category = CategoryCatalog.find(summary.category, summary.type);
-
-  return category?.iconKey.iconData ?? Icons.category_rounded;
+  return summary.definition?.iconKey.iconData ?? Icons.category_rounded;
 }

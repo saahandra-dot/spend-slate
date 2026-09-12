@@ -34,10 +34,7 @@ class AppColors {
 
   // Home screen gradient
   static const LinearGradient purpleGradient = LinearGradient(
-    colors: [
-      Color(0xFF7C4AE8),
-      Color(0xFF4B20A8),
-    ],
+    colors: [Color(0xFF7C4AE8), Color(0xFF4B20A8)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );

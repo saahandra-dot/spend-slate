@@ -31,31 +31,21 @@ class _MainScreenState extends State<MainScreen> {
 
   void _openAddTransaction() {
     Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const AddTransactionScreen(),
-      )
+      MaterialPageRoute(builder: (context) => const AddTransactionScreen()),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _pages,
-      ),
+      body: IndexedStack(index: _selectedIndex, children: _pages),
 
       floatingActionButton: FloatingActionButton(
         onPressed: _openAddTransaction,
-        child: const Icon(
-          Icons.add_rounded,
-          size: 32,
-        ),
+        child: const Icon(Icons.add_rounded, size: 32),
       ),
 
-      floatingActionButtonLocation: 
-        FloatingActionButtonLocation.centerDocked,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
 
       bottomNavigationBar: BottomAppBar(
         color: AppColors.surface,
@@ -84,7 +74,7 @@ class _MainScreenState extends State<MainScreen> {
                     onTap: () => _selectedPage(1),
                   ),
                 ),
-                const SizedBox(width: 72 ), // Space for the FAB  
+                const SizedBox(width: 72), // Space for the FAB
 
                 Expanded(
                   child: _NavigationItem(
@@ -102,21 +92,20 @@ class _MainScreenState extends State<MainScreen> {
                     onTap: () => _selectedPage(3),
                   ),
                 ),
-              ]
-          )
-        )  
-      )
-    ));
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
-
 
 class _NavigationItem extends StatelessWidget {
   final IconData icon;
   final String label;
   final bool isSelected;
   final VoidCallback onTap;
-  
 
   const _NavigationItem({
     required this.icon,
@@ -135,11 +124,7 @@ class _NavigationItem extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            icon,
-            color: color,
-            size: 24,
-          ),
+          Icon(icon, color: color, size: 24),
           const SizedBox(height: 4),
           Text(
             label,
@@ -148,9 +133,9 @@ class _NavigationItem extends StatelessWidget {
               fontSize: 12,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
             ),
-          )
-        ]
-      )
+          ),
+        ],
+      ),
     );
   }
 }

@@ -5,7 +5,8 @@ import 'package:expense_tracker/core/theme/app_colors.dart';
 import 'package:expense_tracker/models/transaction.dart';
 import 'package:expense_tracker/providers/transaction_provider.dart';
 import 'package:expense_tracker/core/utils/app_formatters.dart';
-import 'package:expense_tracker/core/data/category_catalog.dart';
+import 'package:expense_tracker/models/category.dart';
+import 'package:expense_tracker/providers/category_provider.dart';
 
 class AddTransactionScreen extends ConsumerStatefulWidget {
   final ExpenseTransaction? transaction;
@@ -31,35 +32,21 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
   DateTime _selectedDate = DateTime.now();
 
-  List<String> get _availableCategories {
-    final List<String> categories = CategoryCatalog.forType(
-      _selectedType,
-    ).map((category) => category.name).toList();
+  List<String> _availableCategories(List<AppCategory> categoryOptions) {
+    final categories = categoryOptions
+        .map((category) => category.name)
+        .toList();
 
-    final String? selectedCategory = _selectedCategory;
+    final selected = _selectedCategory;
 
-    if (selectedCategory != null &&
-        selectedCategory.isNotEmpty &&
-        !categories.contains(selectedCategory)) {
-      categories.add(selectedCategory);
+    if (selected != null &&
+        selected.isNotEmpty &&
+        !categories.contains(selected)) {
+      categories.add(selected);
     }
 
     return categories;
   }
-
-  // List<String> get _availableCategories {
-  //   final List<String> categories = _selectedType == TransactionType.income
-  //       ? [..._incomeCategories]
-  //       : [..._expenseCategories];
-
-  //   final selectedCategory = _selectedCategory;
-
-  //   if (selectedCategory != null && !categories.contains(selectedCategory)) {
-  //     categories.add(selectedCategory);
-  //   }
-
-  //   return categories;
-  // }
 
   final List<String> _accounts = ['Debit Card', 'Credit Card', 'Savings'];
 
@@ -193,6 +180,13 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   @override
   Widget build(BuildContext context) {
     final bool isEditing = widget.transaction != null;
+    final List<AppCategory> categoryOptions = ref.watch(
+      categoriesForTypeProvider(_selectedType),
+    );
+
+    final List<String> availableCategories = _availableCategories(
+      categoryOptions,
+    );
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -271,8 +265,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     prefixIcon: Icon(Icons.category_rounded),
                   ),
                   autovalidateMode: AutovalidateMode.onUserInteraction,
-                  items: _availableCategories.map((category) {
-                    return DropdownMenuItem<String>(
+                  items: availableCategories.map((category) {
+                    return DropdownMenuItem(
                       value: category,
                       child: Text(category),
                     );
