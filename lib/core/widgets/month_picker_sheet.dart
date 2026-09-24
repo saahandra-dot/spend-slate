@@ -1,3 +1,4 @@
+import 'package:expense_tracker/core/theme/theme_context.dart';
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
@@ -11,7 +12,7 @@ Future<DateTime?> showAppMonthPicker({
     context: context,
     useSafeArea: true,
     showDragHandle: true,
-    backgroundColor: AppColors.surface,
+    backgroundColor: context.appSurface,
     builder: (context) {
       return _MonthPickerSheet(initialMonth: initialMonth);
     },
@@ -59,10 +60,10 @@ class _MonthPickerSheetState extends State<_MonthPickerSheet> {
                 child: Text(
                   '$_selectedYear',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: context.appTextPrimary,
                   ),
                 ),
               ),
@@ -102,7 +103,7 @@ class _MonthPickerSheetState extends State<_MonthPickerSheet> {
               return Material(
                 color: selected
                     ? AppColors.primaryPurple
-                    : AppColors.background,
+                    : context.appBackground,
                 borderRadius: BorderRadius.circular(12),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(12),
@@ -115,7 +116,7 @@ class _MonthPickerSheetState extends State<_MonthPickerSheet> {
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: selected ? Colors.white : AppColors.textPrimary,
+                        color: selected ? Colors.white : context.appTextPrimary,
                       ),
                     ),
                   ),

@@ -1,3 +1,4 @@
+import 'package:expense_tracker/core/theme/theme_context.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -188,7 +189,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       categoryOptions,
     );
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.appBackground,
       appBar: AppBar(
         title: Text(
           isEditing ? 'Edit Transaction' : 'Add Transaction',
@@ -225,18 +226,18 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     decimal: true,
                   ),
                   autovalidateMode: AutovalidateMode.onUserInteraction,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: context.appTextPrimary,
                   ),
                   decoration: InputDecoration(
                     prefixText: '\$ ',
                     hintText: '0.00',
-                    prefixStyle: const TextStyle(
+                    prefixStyle: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
+                      color: context.appTextPrimary,
                     ),
                   ),
                   validator: (value) {
@@ -387,9 +388,9 @@ class _TransactionTypeSelector extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.appSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.appDivider),
       ),
       child: Row(
         children: [
@@ -448,7 +449,7 @@ class _TypeButton extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: selected ? color : AppColors.textSecondary,
+                color: selected ? color : context.appTextSecondary,
               ),
             ),
           ),
@@ -470,17 +471,17 @@ class _FieldLabel extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: context.appTextPrimary,
           ),
         ),
         if (optional) ...[
           const SizedBox(width: 5),
-          const Text(
+          Text(
             '(Optional)',
-            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            style: TextStyle(fontSize: 12, color: context.appTextSecondary),
           ),
         ],
       ],
@@ -502,7 +503,7 @@ class _SelectionField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.surface,
+      color: context.appSurface,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -511,24 +512,21 @@ class _SelectionField extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 17),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.divider),
+            border: Border.all(color: context.appDivider),
           ),
           child: Row(
             children: [
-              Icon(icon, color: AppColors.textSecondary, size: 20),
+              Icon(icon, color: context.appTextSecondary, size: 20),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   text,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    color: AppColors.textPrimary,
-                  ),
+                  style: TextStyle(fontSize: 15, color: context.appTextPrimary),
                 ),
               ),
-              const Icon(
+              Icon(
                 Icons.chevron_right_rounded,
-                color: AppColors.textSecondary,
+                color: context.appTextSecondary,
               ),
             ],
           ),

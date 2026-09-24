@@ -1,3 +1,4 @@
+import 'package:expense_tracker/core/theme/theme_context.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,6 +13,7 @@ import '../../core/data/category_catalog.dart';
 import '../../core/theme/category_visuals.dart';
 import '../../models/category.dart';
 import '../../providers/category_provider.dart';
+import '../../core/widgets/app_currency_scope.dart';
 
 enum _ReportType { expenses, income }
 
@@ -144,7 +146,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
     final transactionsAsync = ref.watch(monthlyTransactionsProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.appBackground,
       body: SafeArea(
         child: Column(
           children: [
@@ -218,10 +220,10 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                           alignment: Alignment.centerLeft,
                           child: Text(
                             _reportTitle,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 23,
                               fontWeight: FontWeight.w700,
-                              color: AppColors.textPrimary,
+                              color: context.appTextPrimary,
                             ),
                           ),
                         ),
@@ -267,7 +269,7 @@ class _ReportHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
+    return Padding(
       padding: EdgeInsets.fromLTRB(20, 18, 20, 14),
       child: Align(
         alignment: Alignment.centerLeft,
@@ -276,7 +278,7 @@ class _ReportHeader extends StatelessWidget {
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: context.appTextPrimary,
           ),
         ),
       ),
@@ -318,11 +320,11 @@ class _ReportTypeSelector extends StatelessWidget {
           onChanged(selection.first);
         },
         style: SegmentedButton.styleFrom(
-          backgroundColor: AppColors.surface,
-          foregroundColor: AppColors.textSecondary,
+          backgroundColor: context.appSurface,
+          foregroundColor: context.appTextSecondary,
           selectedBackgroundColor: AppColors.primaryPurple,
           selectedForegroundColor: Colors.white,
-          side: const BorderSide(color: AppColors.divider),
+          side: BorderSide(color: context.appDivider),
           padding: const EdgeInsets.symmetric(vertical: 14),
         ),
       ),
@@ -339,7 +341,7 @@ class _MonthSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.surface,
+      color: context.appSurface,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -348,7 +350,7 @@ class _MonthSelector extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.divider),
+            border: Border.all(color: context.appDivider),
           ),
           child: Row(
             children: [
@@ -363,17 +365,17 @@ class _MonthSelector extends StatelessWidget {
               Expanded(
                 child: Text(
                   AppFormatters.monthYear(selectedMonth),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: context.appTextPrimary,
                   ),
                 ),
               ),
 
-              const Icon(
+              Icon(
                 Icons.keyboard_arrow_down_rounded,
-                color: AppColors.textSecondary,
+                color: context.appTextSecondary,
               ),
             ],
           ),
@@ -404,7 +406,7 @@ class _ReportTotalCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(20, 28, 20, 22),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.appSurface,
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
@@ -431,20 +433,20 @@ class _ReportTotalCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
+              Icon(
                 Icons.receipt_long_rounded,
                 size: 17,
-                color: AppColors.textSecondary,
+                color: context.appTextSecondary,
               ),
 
               const SizedBox(width: 7),
 
               Text(
                 countText,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textSecondary,
+                  color: context.appTextSecondary,
                 ),
               ),
             ],
@@ -479,7 +481,7 @@ class _MonthComparisonCard extends StatelessWidget {
     final bool isPositiveChange = isExpense ? decreased : increased;
 
     final Color statusColor = unchanged
-        ? AppColors.textSecondary
+        ? context.appTextSecondary
         : isPositiveChange
         ? AppColors.positive
         : AppColors.expense;
@@ -496,19 +498,16 @@ class _MonthComparisonCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.appSurface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.appDivider),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Compared with $previousMonthLabel',
-            style: const TextStyle(
-              fontSize: 13,
-              color: AppColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 13, color: context.appTextSecondary),
           ),
 
           const SizedBox(height: 12),
@@ -532,11 +531,11 @@ class _MonthComparisonCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _differenceText(),
-                      style: const TextStyle(
+                      _differenceText(context),
+                      style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                        color: context.appTextPrimary,
                       ),
                     ),
 
@@ -555,11 +554,11 @@ class _MonthComparisonCard extends StatelessWidget {
               ),
 
               Text(
-                AppFormatters.currency(comparison.previous),
-                style: const TextStyle(
+                AppCurrencyScope.format(context, comparison.previous),
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textSecondary,
+                  color: context.appTextSecondary,
                 ),
               ),
             ],
@@ -569,16 +568,16 @@ class _MonthComparisonCard extends StatelessWidget {
     );
   }
 
-  String _differenceText() {
+  String _differenceText(BuildContext context) {
     final double difference = comparison.difference;
 
-    if (difference == 0) {
-      return 'No change';
-    }
+    final String sign = difference > 0
+        ? '+'
+        : difference < 0
+        ? '-'
+        : '';
 
-    final String sign = difference > 0 ? '+' : '-';
-
-    return '$sign${AppFormatters.currency(difference.abs())}';
+    return '$sign${AppCurrencyScope.format(context, difference.abs())}';
   }
 
   String _comparisonText() {
@@ -726,24 +725,24 @@ class _DonutCenterContent extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
+                color: context.appTextSecondary,
               ),
             ),
 
             const SizedBox(height: 6),
 
             Text(
-              AppFormatters.currency(selectedCategory!.amount),
+              AppCurrencyScope.format(context, selectedCategory!.amount),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: context.appTextPrimary,
               ),
             ),
 
@@ -767,22 +766,22 @@ class _DonutCenterContent extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
+          Text(
             'Total',
-            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+            style: TextStyle(fontSize: 13, color: context.appTextSecondary),
           ),
 
           const SizedBox(height: 6),
 
           Text(
-            AppFormatters.currency(total),
+            AppCurrencyScope.format(context, total),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+              color: context.appTextPrimary,
             ),
           ),
         ],
@@ -809,26 +808,26 @@ class _EmptyDonutChart extends StatelessWidget {
             height: 190,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: AppColors.divider, width: 26),
+              border: Border.all(color: context.appDivider, width: 26),
             ),
           ),
 
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
+              Text(
                 'Total',
-                style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: 13, color: context.appTextSecondary),
               ),
 
               const SizedBox(height: 6),
 
               Text(
-                AppFormatters.currency(total),
-                style: const TextStyle(
+                AppCurrencyScope.format(context, total),
+                style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: context.appTextPrimary,
                 ),
               ),
             ],
@@ -890,7 +889,7 @@ class _LegendItem extends StatelessWidget {
 
         Text(
           category,
-          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+          style: TextStyle(fontSize: 11, color: context.appTextSecondary),
         ),
       ],
     );
@@ -916,19 +915,19 @@ class _CategoryBreakdownSection extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.appSurface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.appDivider),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Category Breakdown',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+              color: context.appTextPrimary,
             ),
           ),
 
@@ -938,10 +937,7 @@ class _CategoryBreakdownSection extends StatelessWidget {
             reportType == _ReportType.expenses
                 ? 'Where your money went'
                 : 'Where your income came from',
-            style: const TextStyle(
-              fontSize: 13,
-              color: AppColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 13, color: context.appTextSecondary),
           ),
 
           const SizedBox(height: 20),
@@ -1004,10 +1000,10 @@ class _CategoryBreakdownTile extends StatelessWidget {
                     summary.category,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: context.appTextPrimary,
                     ),
                   ),
 
@@ -1015,9 +1011,9 @@ class _CategoryBreakdownTile extends StatelessWidget {
 
                   Text(
                     countText,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
-                      color: AppColors.textSecondary,
+                      color: context.appTextSecondary,
                     ),
                   ),
                 ],
@@ -1030,11 +1026,11 @@ class _CategoryBreakdownTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  AppFormatters.currency(summary.amount),
-                  style: const TextStyle(
+                  AppCurrencyScope.format(context, summary.amount),
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: context.appTextPrimary,
                   ),
                 ),
 
@@ -1060,7 +1056,7 @@ class _CategoryBreakdownTile extends StatelessWidget {
           child: LinearProgressIndicator(
             minHeight: 7,
             value: summary.percentage / 100,
-            backgroundColor: AppColors.divider,
+            backgroundColor: context.appDivider,
             valueColor: AlwaysStoppedAnimation<Color>(categoryColor),
           ),
         ),
@@ -1084,8 +1080,8 @@ class _NoReportData extends StatelessWidget {
             Container(
               width: 58,
               height: 58,
-              decoration: const BoxDecoration(
-                color: AppColors.lightPurple,
+              decoration: BoxDecoration(
+                color: context.appSoftPrimary,
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -1100,10 +1096,7 @@ class _NoReportData extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 14,
-                color: AppColors.textSecondary,
-              ),
+              style: TextStyle(fontSize: 14, color: context.appTextSecondary),
             ),
           ],
         ),
@@ -1133,22 +1126,22 @@ class _ReportErrorState extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            const Text(
+            Text(
               'Unable to load report',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: context.appTextPrimary,
               ),
             ),
 
             const SizedBox(height: 8),
 
-            const Text(
+            Text(
               'Your transaction data could not be loaded.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.textSecondary),
+              style: TextStyle(color: context.appTextSecondary),
             ),
 
             const SizedBox(height: 18),

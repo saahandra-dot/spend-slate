@@ -1,7 +1,7 @@
+import 'package:expense_tracker/core/theme/theme_context.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/theme/app_colors.dart';
 import '../../core/theme/category_visuals.dart';
 import '../../models/category.dart';
 import '../../models/transaction.dart';
@@ -25,7 +25,7 @@ class _CategoryManagementScreenState
     final categoriesAsync = ref.watch(categoriesProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.appBackground,
       appBar: AppBar(
         title: const Text(
           'Categories',

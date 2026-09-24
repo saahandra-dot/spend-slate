@@ -1,3 +1,4 @@
+import 'package:expense_tracker/core/theme/theme_context.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -7,6 +8,7 @@ import '../../../providers/category_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/app_formatters.dart';
 import '../../../models/transaction.dart';
+import '../../../core/widgets/app_currency_scope.dart';
 
 class TransactionTile extends ConsumerWidget {
   final ExpenseTransaction transaction;
@@ -36,7 +38,7 @@ class TransactionTile extends ConsumerWidget {
         category?.iconKey.iconData ?? Icons.receipt_rounded;
 
     final Color categoryColor =
-        category?.colorKey.color ?? AppColors.textSecondary;
+        category?.colorKey.color ?? context.appTextSecondary;
 
     final List<String> details = [
       if (transaction.account != null && transaction.account!.trim().isNotEmpty)
@@ -73,10 +75,10 @@ class TransactionTile extends ConsumerWidget {
                     transaction.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: context.appTextPrimary,
                     ),
                   ),
 
@@ -87,9 +89,9 @@ class TransactionTile extends ConsumerWidget {
                       subtitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.textSecondary,
+                        color: context.appTextSecondary,
                       ),
                     ),
                   ],
@@ -100,7 +102,7 @@ class TransactionTile extends ConsumerWidget {
             const SizedBox(width: 12),
 
             Text(
-              _formattedAmount(transaction),
+              _formattedAmount(context, transaction),
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
@@ -113,13 +115,12 @@ class TransactionTile extends ConsumerWidget {
     );
   }
 
-  String _formattedAmount(ExpenseTransaction transaction) {
-    final String amount = AppFormatters.currency(transaction.amount);
+  String _formattedAmount(
+    BuildContext context,
+    ExpenseTransaction transaction,
+  ) {
+    final amount = AppCurrencyScope.format(context, transaction.amount);
 
-    if (transaction.type == TransactionType.income) {
-      return '+$amount';
-    }
-
-    return '-$amount';
+    return transaction.type == TransactionType.income ? '+$amount' : '-$amount';
   }
 }

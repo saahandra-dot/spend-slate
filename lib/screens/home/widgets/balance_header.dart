@@ -6,6 +6,7 @@ import '../../../core/utils/app_formatters.dart';
 import '../../../core/widgets/month_picker_sheet.dart';
 import '../../../providers/period_provider.dart';
 import '../../../providers/transaction_provider.dart';
+import '../../../core/widgets/app_currency_scope.dart';
 import 'money_summary_card.dart';
 
 class BalanceHeader extends ConsumerWidget {
@@ -90,7 +91,7 @@ class BalanceHeader extends ConsumerWidget {
                     const SizedBox(height: 8),
 
                     Text(
-                      AppFormatters.currency(currentBalance),
+                      AppCurrencyScope.format(context, currentBalance),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(

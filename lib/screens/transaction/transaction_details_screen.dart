@@ -1,3 +1,4 @@
+import 'package:expense_tracker/core/theme/theme_context.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -6,6 +7,7 @@ import '../../models/transaction.dart';
 import '../../providers/transaction_provider.dart';
 import '../../core/utils/app_formatters.dart';
 import 'add_transaction_screen.dart';
+import '../../core/widgets/app_currency_scope.dart';
 
 class TransactionDetailsScreen extends ConsumerWidget {
   final ExpenseTransaction transaction;
@@ -17,7 +19,7 @@ class TransactionDetailsScreen extends ConsumerWidget {
     final bool isExpense = transaction.type == TransactionType.expense;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.appBackground,
 
       appBar: AppBar(
         title: const Text(
@@ -34,7 +36,7 @@ class TransactionDetailsScreen extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: context.appSurface,
                 borderRadius: BorderRadius.circular(24),
               ),
               child: Column(
@@ -57,10 +59,10 @@ class TransactionDetailsScreen extends ConsumerWidget {
 
                   Text(
                     transaction.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
+                      color: context.appTextPrimary,
                     ),
                   ),
 
@@ -68,7 +70,7 @@ class TransactionDetailsScreen extends ConsumerWidget {
 
                   Text(
                     '${isExpense ? '-' : '+'}'
-                    '${AppFormatters.currency(transaction.amount)}',
+                    '${AppCurrencyScope.format(context, transaction.amount)}',
                     style: TextStyle(
                       fontSize: 30,
                       fontWeight: FontWeight.w700,
@@ -84,7 +86,7 @@ class TransactionDetailsScreen extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: context.appSurface,
                 borderRadius: BorderRadius.circular(24),
               ),
               child: Column(
@@ -251,20 +253,17 @@ class _DetailRow extends StatelessWidget {
           width: 90,
           child: Text(
             label,
-            style: const TextStyle(
-              fontSize: 14,
-              color: AppColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 14, color: context.appTextSecondary),
           ),
         ),
         Expanded(
           child: Text(
             value,
             textAlign: TextAlign.right,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: context.appTextPrimary,
             ),
           ),
         ),

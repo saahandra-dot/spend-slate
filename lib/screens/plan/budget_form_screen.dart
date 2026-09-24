@@ -1,3 +1,4 @@
+import 'package:expense_tracker/core/theme/theme_context.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -165,7 +166,7 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
     final categoriesAsync = ref.watch(categoriesProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.appBackground,
       appBar: AppBar(
         title: Text(
           widget.isEditing ? 'Edit Budget' : 'Add Budget',
@@ -324,7 +325,7 @@ class _BudgetPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color color = category?.colorKey.color ?? AppColors.primaryPurple;
+    // final Color color = category?.colorKey.color ?? AppColors.primaryPurple;
 
     return Container(
       width: double.infinity,
@@ -398,7 +399,7 @@ class _BudgetMonthField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.surface,
+      color: context.appSurface,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -407,7 +408,7 @@ class _BudgetMonthField extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.divider),
+            border: Border.all(color: context.appDivider),
           ),
           child: Row(
             children: [
@@ -418,30 +419,30 @@ class _BudgetMonthField extends StatelessWidget {
 
               const SizedBox(width: 12),
 
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Budget month',
                   style: TextStyle(
                     fontSize: 13,
-                    color: AppColors.textSecondary,
+                    color: context.appTextSecondary,
                   ),
                 ),
               ),
 
               Text(
                 AppFormatters.monthYear(month),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  color: context.appTextPrimary,
                 ),
               ),
 
               const SizedBox(width: 4),
 
-              const Icon(
+              Icon(
                 Icons.keyboard_arrow_down_rounded,
-                color: AppColors.textSecondary,
+                color: context.appTextSecondary,
               ),
             ],
           ),

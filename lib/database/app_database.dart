@@ -80,7 +80,13 @@ class BudgetEntries extends Table {
 }
 
 @DriftDatabase(
-  tables: [TransactionEntries, CategoryEntries, GoalEntries, BudgetEntries],
+  tables: [
+    TransactionEntries,
+    CategoryEntries,
+    GoalEntries,
+    BudgetEntries,
+    AppSettingEntries,
+  ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
@@ -88,7 +94,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.defaults() : super(driftDatabase(name: 'expense_tracker'));
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration {
@@ -106,6 +112,9 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 4) {
           await migrator.createTable(budgetEntries);
+        }
+        if (from < 5) {
+          await migrator.createTable(appSettingEntries);
         }
       },
 
@@ -130,4 +139,13 @@ class AppDatabase extends _$AppDatabase {
       );
     }
   }
+}
+
+class AppSettingEntries extends Table {
+  TextColumn get key => text()();
+
+  TextColumn get value => text()();
+
+  @override
+  Set<Column> get primaryKey => {key};
 }

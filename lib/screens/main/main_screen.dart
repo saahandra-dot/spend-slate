@@ -1,4 +1,5 @@
 import 'package:expense_tracker/core/theme/app_colors.dart';
+import 'package:expense_tracker/core/theme/theme_context.dart';
 import 'package:expense_tracker/screens/home/home_screen.dart';
 import 'package:expense_tracker/screens/plan/plan_screen.dart';
 import 'package:expense_tracker/screens/report/report_screen.dart';
@@ -41,6 +42,7 @@ class _MainScreenState extends State<MainScreen> {
       body: IndexedStack(index: _selectedIndex, children: _pages),
 
       floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.primaryPurple,
         onPressed: _openAddTransaction,
         child: const Icon(Icons.add_rounded, size: 32),
       ),
@@ -48,7 +50,7 @@ class _MainScreenState extends State<MainScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
 
       bottomNavigationBar: BottomAppBar(
-        color: AppColors.surface,
+        color: context.appSurface,
         shape: const CircularNotchedRectangle(),
         notchMargin: 8.0,
         padding: EdgeInsets.zero,
@@ -118,7 +120,7 @@ class _NavigationItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = isSelected
         ? AppColors.primaryPurple
-        : AppColors.textSecondary;
+        : context.appTextSecondary;
     return InkWell(
       onTap: onTap,
       child: Column(

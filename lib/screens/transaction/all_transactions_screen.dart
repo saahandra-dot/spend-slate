@@ -1,3 +1,4 @@
+import 'package:expense_tracker/core/theme/theme_context.dart';
 import 'package:expense_tracker/providers/period_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +10,7 @@ import '../../providers/transaction_provider.dart';
 import '../home/widgets/transaction_tile.dart';
 import 'add_transaction_screen.dart';
 import 'transaction_details_screen.dart';
+import '../../core/widgets/app_currency_scope.dart';
 
 enum _TransactionTypeFilter { all, expense, income }
 
@@ -164,7 +166,7 @@ class _AllTransactionsScreenState extends ConsumerState<AllTransactionsScreen> {
     final transactionsAsync = ref.watch(transactionsProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.appBackground,
       appBar: AppBar(
         title: const Text(
           'All Transactions',
@@ -332,19 +334,19 @@ class _TransactionsOverview extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(20, 16, 20, 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.appSurface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.appDivider),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             countText,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: AppColors.textSecondary,
+              color: context.appTextSecondary,
             ),
           ),
 
@@ -355,7 +357,7 @@ class _TransactionsOverview extends StatelessWidget {
               Expanded(
                 child: _OverviewItem(
                   label: 'Income',
-                  amount: AppFormatters.currency(totalIncome),
+                  amount: AppCurrencyScope.format(context, totalIncome),
                   color: AppColors.positive,
                   icon: Icons.arrow_downward_rounded,
                 ),
@@ -363,9 +365,9 @@ class _TransactionsOverview extends StatelessWidget {
 
               const SizedBox(width: 16),
 
-              const SizedBox(
+              SizedBox(
                 height: 52,
-                child: VerticalDivider(width: 1, color: AppColors.divider),
+                child: VerticalDivider(width: 1, color: context.appDivider),
               ),
 
               const SizedBox(width: 16),
@@ -373,7 +375,7 @@ class _TransactionsOverview extends StatelessWidget {
               Expanded(
                 child: _OverviewItem(
                   label: 'Expenses',
-                  amount: AppFormatters.currency(totalExpenses),
+                  amount: AppCurrencyScope.format(context, totalExpenses),
                   color: AppColors.expense,
                   icon: Icons.arrow_upward_rounded,
                 ),
@@ -421,10 +423,7 @@ class _OverviewItem extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textSecondary,
-                ),
+                style: TextStyle(fontSize: 12, color: context.appTextSecondary),
               ),
 
               const SizedBox(height: 3),
@@ -433,10 +432,10 @@ class _OverviewItem extends StatelessWidget {
                 amount,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: context.appTextPrimary,
                 ),
               ),
             ],
@@ -658,8 +657,8 @@ class _NoSearchResults extends StatelessWidget {
             Container(
               width: 68,
               height: 68,
-              decoration: const BoxDecoration(
-                color: AppColors.lightPurple,
+              decoration: BoxDecoration(
+                color: context.appSoftPrimary,
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -671,13 +670,13 @@ class _NoSearchResults extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            const Text(
+            Text(
               'No matching transactions',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: context.appTextPrimary,
               ),
             ),
 
@@ -686,10 +685,10 @@ class _NoSearchResults extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 height: 1.5,
-                color: AppColors.textSecondary,
+                color: context.appTextSecondary,
               ),
             ),
 
@@ -741,9 +740,9 @@ class _TransactionDateSection extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: context.appSurface,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppColors.divider),
+              border: Border.all(color: context.appDivider),
             ),
             child: Column(
               children: [
@@ -785,24 +784,24 @@ class _DateHeader extends StatelessWidget {
 
     final String formattedNet =
         '${isPositive ? '+' : '-'}'
-        '${AppFormatters.currency(net.abs())}';
+        '${AppCurrencyScope.format(context, net.abs())}';
 
     return Row(
       children: [
         Expanded(
           child: Text(
             AppFormatters.transactionGroupDate(date),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+              color: context.appTextPrimary,
             ),
           ),
         ),
 
-        const Text(
+        Text(
           'Net ',
-          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+          style: TextStyle(fontSize: 12, color: context.appTextSecondary),
         ),
 
         Text(
@@ -833,8 +832,8 @@ class _EmptyState extends StatelessWidget {
             Container(
               width: 72,
               height: 72,
-              decoration: const BoxDecoration(
-                color: AppColors.lightPurple,
+              decoration: BoxDecoration(
+                color: context.appSoftPrimary,
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -846,25 +845,25 @@ class _EmptyState extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            const Text(
+            Text(
               'No transactions yet',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: context.appTextPrimary,
               ),
             ),
 
             const SizedBox(height: 8),
 
-            const Text(
+            Text(
               'Your income and expenses '
               'will appear here.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
                 height: 1.5,
-                color: AppColors.textSecondary,
+                color: context.appTextSecondary,
               ),
             ),
 
@@ -906,23 +905,23 @@ class _ErrorState extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            const Text(
+            Text(
               'Unable to load transactions',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: context.appTextPrimary,
               ),
             ),
 
             const SizedBox(height: 8),
 
-            const Text(
+            Text(
               'Please try loading your '
               'transaction history again.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.textSecondary),
+              style: TextStyle(color: context.appTextSecondary),
             ),
 
             const SizedBox(height: 16),

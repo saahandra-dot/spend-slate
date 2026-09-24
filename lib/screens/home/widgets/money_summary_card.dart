@@ -1,7 +1,8 @@
+import 'package:expense_tracker/core/theme/theme_context.dart';
 import 'package:flutter/material.dart';
 
-import '../../../core/utils/app_formatters.dart';
-import 'package:expense_tracker/core/theme/app_colors.dart';
+import '../../../core/widgets/app_currency_scope.dart';
+import '../../../core/theme/app_colors.dart';
 
 class MoneySummaryCard extends StatelessWidget {
   final double income;
@@ -16,9 +17,9 @@ class MoneySummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+      padding: EdgeInsets.fromLTRB(20, 20, 20, 24),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.appSurface,
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
@@ -33,34 +34,34 @@ class MoneySummaryCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Text(
+              Text(
                 'Your money',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: context.appTextPrimary,
                 ),
               ),
               const SizedBox(width: 6),
-              const Icon(
+              Icon(
                 Icons.info_outline_rounded,
                 size: 18,
-                color: AppColors.textSecondary,
+                color: context.appTextSecondary,
               ),
               const Spacer(),
-              const Text(
+              Text(
                 'Details',
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textSecondary,
+                  color: context.appTextSecondary,
                 ),
               ),
               const SizedBox(width: 2),
-              const Icon(
+              Icon(
                 Icons.chevron_right_rounded,
                 size: 20,
-                color: AppColors.textSecondary,
+                color: context.appTextSecondary,
               ),
             ],
           ),
@@ -70,7 +71,7 @@ class MoneySummaryCard extends StatelessWidget {
               Expanded(
                 child: _MoneyItem(
                   title: 'Income',
-                  amount: AppFormatters.currency(income),
+                  amount: AppCurrencyScope.format(context, income),
                   icon: Icons.arrow_downward_rounded,
                   color: AppColors.income,
                 ),
@@ -78,13 +79,13 @@ class MoneySummaryCard extends StatelessWidget {
               SizedBox(width: 18),
               SizedBox(
                 height: 70,
-                child: VerticalDivider(color: AppColors.divider, width: 1),
+                child: VerticalDivider(color: context.appDivider, width: 1),
               ),
               SizedBox(width: 18),
               Expanded(
                 child: _MoneyItem(
                   title: 'Expense',
-                  amount: AppFormatters.currency(expenses),
+                  amount: AppCurrencyScope.format(context, expenses),
                   icon: Icons.arrow_upward_rounded,
                   color: AppColors.expense,
                 ),
@@ -129,26 +130,23 @@ class _MoneyItem extends StatelessWidget {
           children: [
             Text(
               title,
-              style: const TextStyle(
-                fontSize: 13,
-                color: AppColors.textSecondary,
-              ),
+              style: TextStyle(fontSize: 13, color: context.appTextSecondary),
             ),
             const SizedBox(width: 4),
-            const Icon(
+            Icon(
               Icons.info_outline_rounded,
               size: 14,
-              color: AppColors.textSecondary,
+              color: context.appTextSecondary,
             ),
           ],
         ),
         const SizedBox(height: 5),
         Text(
           amount,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 19,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: context.appTextPrimary,
           ),
         ),
       ],

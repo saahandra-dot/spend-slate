@@ -1,3 +1,5 @@
+import 'package:expense_tracker/core/theme/theme_context.dart';
+import 'package:expense_tracker/core/widgets/app_currency_scope.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -165,7 +167,7 @@ class PlanScreen extends ConsumerWidget {
         categoriesAsync.value ?? CategoryCatalog.categories;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.appBackground,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(20, 18, 20, 120),
@@ -255,12 +257,12 @@ class PlanScreen extends ConsumerWidget {
 
                             const SizedBox(width: 10),
 
-                            const Text(
+                            Text(
                               'Completed Goals',
                               style: TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
+                                color: context.appTextPrimary,
                               ),
                             ),
                           ],
@@ -390,7 +392,7 @@ class _PlanHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
@@ -398,7 +400,7 @@ class _PlanHeader extends StatelessWidget {
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: context.appTextPrimary,
           ),
         ),
 
@@ -409,7 +411,7 @@ class _PlanHeader extends StatelessWidget {
           style: TextStyle(
             fontSize: 14,
             height: 1.4,
-            color: AppColors.textSecondary,
+            color: context.appTextSecondary,
           ),
         ),
       ],
@@ -523,7 +525,7 @@ class _SectionHeader extends StatelessWidget {
           width: 42,
           height: 42,
           decoration: BoxDecoration(
-            color: AppColors.lightPurple,
+            color: context.appSoftPrimary,
             borderRadius: BorderRadius.circular(13),
           ),
           child: Icon(icon, size: 21, color: AppColors.primaryPurple),
@@ -537,10 +539,10 @@ class _SectionHeader extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: context.appTextPrimary,
                 ),
               ),
 
@@ -548,10 +550,7 @@ class _SectionHeader extends StatelessWidget {
 
               Text(
                 subtitle,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textSecondary,
-                ),
+                style: TextStyle(fontSize: 12, color: context.appTextSecondary),
               ),
             ],
           ),
@@ -590,7 +589,7 @@ class _BudgetSectionHeader extends StatelessWidget {
               width: 42,
               height: 42,
               decoration: BoxDecoration(
-                color: AppColors.lightPurple,
+                color: context.appSoftPrimary,
                 borderRadius: BorderRadius.circular(13),
               ),
               child: const Icon(
@@ -602,7 +601,7 @@ class _BudgetSectionHeader extends StatelessWidget {
 
             const SizedBox(width: 12),
 
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -611,7 +610,7 @@ class _BudgetSectionHeader extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
+                      color: context.appTextPrimary,
                     ),
                   ),
 
@@ -621,7 +620,7 @@ class _BudgetSectionHeader extends StatelessWidget {
                     'Set limits for monthly spending',
                     style: TextStyle(
                       fontSize: 12,
-                      color: AppColors.textSecondary,
+                      color: context.appTextSecondary,
                     ),
                   ),
                 ],
@@ -661,9 +660,9 @@ class _MonthlyBudgetSummaryCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.appSurface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.appDivider),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -674,7 +673,7 @@ class _MonthlyBudgetSummaryCard extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: AppColors.lightPurple,
+                  color: context.appSoftPrimary,
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: const Icon(
@@ -691,10 +690,10 @@ class _MonthlyBudgetSummaryCard extends StatelessWidget {
                   children: [
                     Text(
                       '${AppFormatters.monthYear(selectedMonth)} Budget',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                        color: context.appTextPrimary,
                       ),
                     ),
 
@@ -704,9 +703,9 @@ class _MonthlyBudgetSummaryCard extends StatelessWidget {
                       summary.budgetCount == 1
                           ? '1 category budget'
                           : '${summary.budgetCount} category budgets',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.textSecondary,
+                        color: context.appTextSecondary,
                       ),
                     ),
                   ],
@@ -722,7 +721,7 @@ class _MonthlyBudgetSummaryCard extends StatelessWidget {
               Expanded(
                 child: _BudgetSummaryMetric(
                   label: 'Total limits',
-                  value: AppFormatters.currency(summary.totalLimit),
+                  value: AppCurrencyScope.format(context, summary.totalLimit),
                 ),
               ),
 
@@ -731,7 +730,7 @@ class _MonthlyBudgetSummaryCard extends StatelessWidget {
               Expanded(
                 child: _BudgetSummaryMetric(
                   label: 'Spent',
-                  value: AppFormatters.currency(summary.totalSpent),
+                  value: AppCurrencyScope.format(context, summary.totalSpent),
                 ),
               ),
             ],
@@ -741,9 +740,9 @@ class _MonthlyBudgetSummaryCard extends StatelessWidget {
 
           Row(
             children: [
-              const Text(
+              Text(
                 'Monthly budget used',
-                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: 12, color: context.appTextSecondary),
               ),
 
               const Spacer(),
@@ -766,7 +765,7 @@ class _MonthlyBudgetSummaryCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: summary.progress,
               minHeight: 10,
-              backgroundColor: AppColors.divider,
+              backgroundColor: context.appDivider,
               valueColor: const AlwaysStoppedAnimation<Color>(
                 AppColors.primaryPurple,
               ),
@@ -779,7 +778,7 @@ class _MonthlyBudgetSummaryCard extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
-              color: AppColors.background,
+              color: context.appBackground,
               borderRadius: BorderRadius.circular(14),
             ),
             child: Row(
@@ -792,22 +791,22 @@ class _MonthlyBudgetSummaryCard extends StatelessWidget {
 
                 const SizedBox(width: 9),
 
-                const Expanded(
+                Expanded(
                   child: Text(
                     'Available',
                     style: TextStyle(
                       fontSize: 13,
-                      color: AppColors.textSecondary,
+                      color: context.appTextSecondary,
                     ),
                   ),
                 ),
 
                 Text(
-                  AppFormatters.currency(summary.availableAmount),
-                  style: const TextStyle(
+                  AppCurrencyScope.format(context, summary.availableAmount),
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: context.appTextPrimary,
                   ),
                 ),
               ],
@@ -879,10 +878,10 @@ class _BudgetAttentionBanner extends StatelessWidget {
 
                 Text(
                   _detailText(),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
                     height: 1.4,
-                    color: AppColors.textSecondary,
+                    color: context.appTextSecondary,
                   ),
                 ),
               ],
@@ -925,7 +924,7 @@ class _BudgetSummaryMetric extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+          style: TextStyle(fontSize: 12, color: context.appTextSecondary),
         ),
 
         const SizedBox(height: 5),
@@ -934,10 +933,10 @@ class _BudgetSummaryMetric extends StatelessWidget {
           value,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: context.appTextPrimary,
           ),
         ),
       ],
@@ -957,7 +956,7 @@ class _BudgetMonthSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.surface,
+      color: context.appSurface,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -967,7 +966,7 @@ class _BudgetMonthSelector extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.divider),
+            border: Border.all(color: context.appDivider),
           ),
           child: Row(
             children: [
@@ -979,27 +978,27 @@ class _BudgetMonthSelector extends StatelessWidget {
 
               const SizedBox(width: 10),
 
-              const Text(
+              Text(
                 'Budget month',
-                style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: 13, color: context.appTextSecondary),
               ),
 
               const Spacer(),
 
               Text(
                 AppFormatters.monthYear(selectedMonth),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  color: context.appTextPrimary,
                 ),
               ),
 
               const SizedBox(width: 4),
 
-              const Icon(
+              Icon(
                 Icons.keyboard_arrow_down_rounded,
-                color: AppColors.textSecondary,
+                color: context.appTextSecondary,
               ),
             ],
           ),
@@ -1030,17 +1029,17 @@ class _EmptyPlanCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(24, 28, 24, 26),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.appSurface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.appDivider),
       ),
       child: Column(
         children: [
           Container(
             width: 64,
             height: 64,
-            decoration: const BoxDecoration(
-              color: AppColors.lightPurple,
+            decoration: BoxDecoration(
+              color: context.appSoftPrimary,
               shape: BoxShape.circle,
             ),
             child: Icon(icon, size: 30, color: AppColors.primaryPurple),
@@ -1050,10 +1049,10 @@ class _EmptyPlanCard extends StatelessWidget {
 
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+              color: context.appTextPrimary,
             ),
           ),
 
@@ -1062,10 +1061,10 @@ class _EmptyPlanCard extends StatelessWidget {
           Text(
             description,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               height: 1.5,
-              color: AppColors.textSecondary,
+              color: context.appTextSecondary,
             ),
           ),
 
@@ -1148,14 +1147,14 @@ class _GoalCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.appSurface,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
           color: completed
               ? AppColors.positive.withValues(alpha: 0.25)
               : overdue
               ? AppColors.expense.withValues(alpha: 0.25)
-              : AppColors.divider,
+              : context.appDivider,
         ),
       ),
       child: Column(
@@ -1187,10 +1186,10 @@ class _GoalCard extends StatelessWidget {
                       goal.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                        color: context.appTextPrimary,
                       ),
                     ),
 
@@ -1263,12 +1262,12 @@ class _GoalCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  '${AppFormatters.currency(goal.currentAmount)} '
-                  'of ${AppFormatters.currency(goal.targetAmount)}',
-                  style: const TextStyle(
+                  '${AppCurrencyScope.format(context, goal.currentAmount)} '
+                  'of ${AppCurrencyScope.format(context, goal.targetAmount)}',
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: context.appTextPrimary,
                   ),
                 ),
               ),
@@ -1293,7 +1292,7 @@ class _GoalCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 9,
-              backgroundColor: AppColors.divider,
+              backgroundColor: context.appDivider,
               valueColor: AlwaysStoppedAnimation<Color>(statusColor),
             ),
           ),
@@ -1316,13 +1315,13 @@ class _GoalCard extends StatelessWidget {
                 child: Text(
                   completed
                       ? 'Target reached'
-                      : '${AppFormatters.currency(goal.remainingAmount)} remaining',
+                      : '${AppCurrencyScope.format(context, goal.remainingAmount)} remaining',
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: completed
                         ? AppColors.positive
-                        : AppColors.textSecondary,
+                        : context.appTextSecondary,
                   ),
                 ),
               ),
@@ -1352,15 +1351,15 @@ class _GoalDeadline extends StatelessWidget {
     final DateTime? targetDate = goal.targetDate;
 
     if (targetDate == null) {
-      return const Row(
+      return Row(
         children: [
-          Icon(Icons.event_outlined, size: 17, color: AppColors.textSecondary),
+          Icon(Icons.event_outlined, size: 17, color: context.appTextSecondary),
 
           SizedBox(width: 7),
 
           Text(
             'No target date',
-            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            style: TextStyle(fontSize: 12, color: context.appTextSecondary),
           ),
         ],
       );
@@ -1392,7 +1391,7 @@ class _GoalDeadline extends StatelessWidget {
         ? AppColors.positive
         : overdue
         ? AppColors.expense
-        : AppColors.textSecondary;
+        : context.appTextSecondary;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1408,10 +1407,7 @@ class _GoalDeadline extends StatelessWidget {
               Text(
                 'Target: '
                 '${AppFormatters.date(targetDate)}',
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textSecondary,
-                ),
+                style: TextStyle(fontSize: 12, color: context.appTextSecondary),
               ),
 
               const SizedBox(height: 3),
@@ -1445,7 +1441,7 @@ class _AllGoalsCompletedCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.positive.withValues(alpha: 0.18)),
       ),
-      child: const Row(
+      child: Row(
         children: [
           Icon(Icons.celebration_rounded, color: AppColors.positive),
 
@@ -1460,7 +1456,7 @@ class _AllGoalsCompletedCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: context.appTextPrimary,
                   ),
                 ),
 
@@ -1470,7 +1466,7 @@ class _AllGoalsCompletedCard extends StatelessWidget {
                   'Create another goal whenever you are ready.',
                   style: TextStyle(
                     fontSize: 12,
-                    color: AppColors.textSecondary,
+                    color: context.appTextSecondary,
                   ),
                 ),
               ],
@@ -1491,9 +1487,9 @@ class _GoalLoadingState extends StatelessWidget {
       width: double.infinity,
       height: 150,
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.appSurface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.appDivider),
       ),
       child: const Center(child: CircularProgressIndicator()),
     );
@@ -1511,9 +1507,9 @@ class _GoalErrorState extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.appSurface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.appDivider),
       ),
       child: Column(
         children: [
@@ -1532,10 +1528,10 @@ class _GoalErrorState extends StatelessWidget {
 
           const SizedBox(height: 8),
 
-          const Text(
+          Text(
             'Please try loading your goals again.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: AppColors.textSecondary),
+            style: TextStyle(color: context.appTextSecondary),
           ),
 
           const SizedBox(height: 14),
@@ -1622,9 +1618,9 @@ class _BudgetCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.appSurface,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.appDivider),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1656,10 +1652,10 @@ class _BudgetCard extends StatelessWidget {
                       category?.name ?? 'Unknown Category',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                        color: context.appTextPrimary,
                       ),
                     ),
 
@@ -1667,9 +1663,9 @@ class _BudgetCard extends StatelessWidget {
 
                     Text(
                       AppFormatters.monthYear(budget.month),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.textSecondary,
+                        color: context.appTextSecondary,
                       ),
                     ),
                     const SizedBox(height: 3),
@@ -1678,9 +1674,9 @@ class _BudgetCard extends StatelessWidget {
                       usage.transactionCount == 1
                           ? '1 expense'
                           : '${usage.transactionCount} expenses',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11,
-                        color: AppColors.textSecondary,
+                        color: context.appTextSecondary,
                       ),
                     ),
                     const SizedBox(height: 7),
@@ -1742,22 +1738,22 @@ class _BudgetCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Spent this month',
                       style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.textSecondary,
+                        color: context.appTextSecondary,
                       ),
                     ),
 
                     const SizedBox(height: 4),
 
                     Text(
-                      AppFormatters.currency(usage.spentAmount),
-                      style: const TextStyle(
+                      AppCurrencyScope.format(context, usage.spentAmount),
+                      style: TextStyle(
                         fontSize: 21,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                        color: context.appTextPrimary,
                       ),
                     ),
                   ],
@@ -1767,22 +1763,22 @@ class _BudgetCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  const Text(
+                  Text(
                     'Limit',
                     style: TextStyle(
                       fontSize: 12,
-                      color: AppColors.textSecondary,
+                      color: context.appTextSecondary,
                     ),
                   ),
 
                   const SizedBox(height: 4),
 
                   Text(
-                    AppFormatters.currency(budget.limitAmount),
-                    style: const TextStyle(
+                    AppCurrencyScope.format(context, budget.limitAmount),
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: context.appTextPrimary,
                     ),
                   ),
                 ],
@@ -1794,9 +1790,9 @@ class _BudgetCard extends StatelessWidget {
 
           Row(
             children: [
-              const Text(
+              Text(
                 'Budget used',
-                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: 12, color: context.appTextSecondary),
               ),
 
               const Spacer(),
@@ -1818,7 +1814,7 @@ class _BudgetCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: usage.progress,
               minHeight: 9,
-              backgroundColor: AppColors.divider,
+              backgroundColor: context.appDivider,
               valueColor: AlwaysStoppedAnimation<Color>(statusColor),
             ),
           ),
@@ -1850,22 +1846,24 @@ class _BudgetRemainingIndicator extends StatelessWidget {
     switch (status) {
       case BudgetStatus.onTrack:
         label = 'Available';
-        amountText = AppFormatters.currency(usage.remainingAmount);
+        amountText = AppCurrencyScope.format(context, usage.remainingAmount);
         icon = Icons.account_balance_wallet_outlined;
 
       case BudgetStatus.nearLimit:
         label = 'Almost at your limit';
-        amountText = '${AppFormatters.currency(usage.remainingAmount)} left';
+        amountText =
+            '${AppCurrencyScope.format(context, usage.remainingAmount)} left';
         icon = Icons.warning_amber_rounded;
 
       case BudgetStatus.atLimit:
         label = 'No budget remaining';
-        amountText = AppFormatters.currency(0);
+        amountText = AppCurrencyScope.format(context, 0);
         icon = Icons.error_outline_rounded;
 
       case BudgetStatus.overBudget:
         label = 'Over budget';
-        amountText = '${AppFormatters.currency(usage.amountOver)} over';
+        amountText =
+            '${AppCurrencyScope.format(context, usage.amountOver)} over';
         icon = Icons.warning_rounded;
     }
 
@@ -1945,9 +1943,9 @@ class _BudgetLoadingState extends StatelessWidget {
       width: double.infinity,
       height: 140,
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.appSurface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.appDivider),
       ),
       child: const Center(child: CircularProgressIndicator()),
     );
@@ -1965,9 +1963,9 @@ class _BudgetErrorState extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.appSurface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.appDivider),
       ),
       child: Column(
         children: [

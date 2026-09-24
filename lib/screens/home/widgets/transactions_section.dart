@@ -1,3 +1,4 @@
+import 'package:expense_tracker/core/theme/theme_context.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -111,36 +112,39 @@ class _TransactionsHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const Text(
-          'Transactions',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+    return Container(
+      padding: const EdgeInsets.only(top: 15),
+      child: Row(
+        children: [
+          Text(
+            'Transactions',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: context.appTextPrimary,
+            ),
           ),
-        ),
 
-        const Spacer(),
+          const Spacer(),
 
-        TextButton(
-          onPressed: onViewAll,
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'View All',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-              ),
+          TextButton(
+            onPressed: onViewAll,
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'View All',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                ),
 
-              SizedBox(width: 2),
+                SizedBox(width: 2),
 
-              Icon(Icons.chevron_right_rounded, size: 18),
-            ],
+                Icon(Icons.chevron_right_rounded, size: 18),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -165,25 +169,25 @@ class _TransactionsSummary extends StatelessWidget {
         Expanded(
           child: Text(
             countLabel,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w500,
-              color: AppColors.textSecondary,
+              color: context.appTextSecondary,
             ),
           ),
         ),
 
-        const Text(
+        Text(
           'Expenses ',
-          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+          style: TextStyle(fontSize: 12, color: context.appTextSecondary),
         ),
 
         Text(
           AppFormatters.currency(totalExpenses),
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: context.appTextPrimary,
           ),
         ),
       ],
@@ -202,9 +206,9 @@ class _EmptyTransactionsState extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(24, 36, 24, 32),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.appSurface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.appDivider),
       ),
       child: Column(
         children: [
@@ -212,7 +216,7 @@ class _EmptyTransactionsState extends StatelessWidget {
             width: 68,
             height: 68,
             decoration: BoxDecoration(
-              color: AppColors.lightPurple,
+              color: context.appSoftPrimary,
               shape: BoxShape.circle,
             ),
             child: const Icon(
@@ -224,26 +228,26 @@ class _EmptyTransactionsState extends StatelessWidget {
 
           const SizedBox(height: 20),
 
-          const Text(
+          Text(
             'No transactions this month',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+              color: context.appTextPrimary,
             ),
           ),
 
           const SizedBox(height: 8),
 
-          const Text(
+          Text(
             'Track your spending and income '
             'by adding your first transaction.',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
               height: 1.5,
-              color: AppColors.textSecondary,
+              color: context.appTextSecondary,
             ),
           ),
 
@@ -289,9 +293,9 @@ class _ErrorState extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.appSurface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.appDivider),
       ),
       child: Column(
         children: [
@@ -311,26 +315,26 @@ class _ErrorState extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          const Text(
+          Text(
             'Unable to load transactions',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+              color: context.appTextPrimary,
             ),
           ),
 
           const SizedBox(height: 8),
 
-          const Text(
+          Text(
             'Something went wrong while '
             'loading your transactions.',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
               height: 1.5,
-              color: AppColors.textSecondary,
+              color: context.appTextSecondary,
             ),
           ),
 

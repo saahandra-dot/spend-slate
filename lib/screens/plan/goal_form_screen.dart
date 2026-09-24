@@ -1,3 +1,4 @@
+import 'package:expense_tracker/core/theme/theme_context.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -155,7 +156,7 @@ class _GoalFormScreenState extends ConsumerState<GoalFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.appBackground,
       appBar: AppBar(
         title: Text(
           widget.isEditing ? 'Edit Goal' : 'Add Goal',
@@ -277,12 +278,12 @@ class _GoalFormScreenState extends ConsumerState<GoalFormScreen> {
 
               const SizedBox(height: 28),
 
-              const Text(
+              Text(
                 'Goal Icon',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: context.appTextPrimary,
                 ),
               ),
 
@@ -414,7 +415,7 @@ class _TargetDateField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.surface,
+      color: context.appSurface,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -422,7 +423,7 @@ class _TargetDateField extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
           decoration: BoxDecoration(
-            border: Border.all(color: AppColors.divider),
+            border: Border.all(color: context.appDivider),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Row(
@@ -435,11 +436,11 @@ class _TargetDateField extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Target date',
                       style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.textSecondary,
+                        color: context.appTextSecondary,
                       ),
                     ),
 
@@ -449,10 +450,10 @@ class _TargetDateField extends StatelessWidget {
                       targetDate == null
                           ? 'No target date'
                           : AppFormatters.date(targetDate!),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                        color: context.appTextPrimary,
                       ),
                     ),
                   ],
@@ -466,9 +467,9 @@ class _TargetDateField extends StatelessWidget {
                   icon: const Icon(Icons.close_rounded),
                 )
               else
-                const Icon(
+                Icon(
                   Icons.chevron_right_rounded,
-                  color: AppColors.textSecondary,
+                  color: context.appTextSecondary,
                 ),
             ],
           ),
